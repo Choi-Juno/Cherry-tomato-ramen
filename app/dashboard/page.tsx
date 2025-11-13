@@ -132,7 +132,7 @@ export default function DashboardPage() {
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-bold text-slate-900">최근 내역</h2>
           <a
-            href="/transactions"
+            href="/dashboard/transactions"
             className="text-sm font-semibold text-violet-600 active:text-violet-700 flex items-center gap-1"
           >
             전체보기 

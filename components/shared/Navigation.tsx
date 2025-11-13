@@ -13,22 +13,22 @@ const NAV_ITEMS = [
   },
   {
     label: "내역",
-    href: "/transactions",
+    href: "/dashboard/transactions",
     icon: Receipt,
   },
   {
     label: "인사이트",
-    href: "/insights",
+    href: "/dashboard/insights",
     icon: Sparkles,
   },
   {
     label: "예산",
-    href: "/budget",
+    href: "/dashboard/budget",
     icon: Target,
   },
   {
     label: "MY",
-    href: "/settings",
+    href: "/dashboard/settings",
     icon: User,
   },
 ];
