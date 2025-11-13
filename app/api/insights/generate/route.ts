@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { mlApiClient } from "@/lib/ml/client";
 import { MLInsightRequest } from "@/types/insight";
+import { Transaction } from "@/types/transaction";
 
 /**
  * POST /api/insights/generate
@@ -9,7 +10,7 @@ import { MLInsightRequest } from "@/types/insight";
  */
 export async function POST() {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
     const {
       data: { user },
     } = await supabase.auth.getUser();
@@ -51,18 +52,18 @@ export async function POST() {
       .eq("user_id", user.id)
       .eq("month", currentMonth);
 
-    const budgetMap = budgets?.reduce(
-      (acc, b) => {
+    const budgetMap = budgets?.reduce<Record<string, number>>(
+      (acc: Record<string, number>, b: { category: string; amount: number }) => {
         acc[b.category] = b.amount;
         return acc;
       },
-      {} as Record<string, number>
+      {}
     ) || {};
 
     // Prepare request for ML service
     const mlRequest: MLInsightRequest = {
       user_id: user.id,
-      transactions: transactions.map((t) => ({
+      transactions: transactions.map((t: Transaction) => ({
         date: t.date,
         amount: t.amount,
         category: t.category,

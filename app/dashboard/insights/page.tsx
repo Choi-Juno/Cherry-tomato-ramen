@@ -1,6 +1,5 @@
 import { AIInsightCard } from "@/components/insights/AIInsightCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AIInsight } from "@/types/insight";
 import { Lightbulb, TrendingUp, AlertTriangle } from "lucide-react";

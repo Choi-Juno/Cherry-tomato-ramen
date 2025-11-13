@@ -1,4 +1,4 @@
-import { createClientComponentClient } from "@supabase/ssr";
+import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "./types";
 
 /**
@@ -6,6 +6,9 @@ import type { Database } from "./types";
  * This client uses the anon key and respects RLS policies
  */
 export function createClient() {
-  return createClientComponentClient<Database>();
+  return createBrowserClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
 }
 

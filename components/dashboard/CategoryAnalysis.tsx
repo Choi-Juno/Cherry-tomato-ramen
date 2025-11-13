@@ -24,10 +24,6 @@ interface CustomLabelProps {
   percent: number;
 }
 
-interface LegendPayload {
-  payload: CategoryData;
-}
-
 const COLORS = [
   "#7c3aed", // violet
   "#ec4899", // pink
@@ -39,21 +35,23 @@ const COLORS = [
   "#64748b", // slate
 ];
 
-// CustomTooltip을 외부로 이동
-function CategoryTooltip({ active, payload }: TooltipProps<number, string>, total: number) {
-  if (active && payload && payload.length) {
-    const percentage = ((payload[0].value as number / total) * 100).toFixed(1);
-    return (
-      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-        <p className="text-sm font-medium">{payload[0].payload.label}</p>
-        <p className="text-sm text-violet-600 font-semibold">
-          {formatCurrency(payload[0].value as number)}
-        </p>
-        <p className="text-xs text-slate-600">{percentage}%</p>
-      </div>
-    );
-  }
-  return null;
+// CustomTooltip을 외부로 이동 - 고차 함수로 변경
+function createCategoryTooltip(total: number) {
+  return function CategoryTooltip({ active, payload }: TooltipProps<number, string>) {
+    if (active && payload && payload.length) {
+      const percentage = ((payload[0].value as number / total) * 100).toFixed(1);
+      return (
+        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+          <p className="text-sm font-medium">{payload[0].payload.label}</p>
+          <p className="text-sm text-violet-600 font-semibold">
+            {formatCurrency(payload[0].value as number)}
+          </p>
+          <p className="text-xs text-slate-600">{percentage}%</p>
+        </div>
+      );
+    }
+    return null;
+  };
 }
 
 // CustomLabel을 외부로 이동
@@ -84,6 +82,7 @@ export function CategoryAnalysis({
   title = "카테고리별 지출",
 }: CategoryAnalysisProps) {
   const total = data.reduce((sum, item) => sum + item.amount, 0);
+  const CustomTooltip = createCategoryTooltip(total);
 
   return (
     <Card>
@@ -107,13 +106,14 @@ export function CategoryAnalysis({
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
               ))}
             </Pie>
-            <Tooltip content={(props) => CategoryTooltip(props, total)} />
+            <Tooltip content={CustomTooltip} />
             <Legend
               verticalAlign="bottom"
               height={36}
-              formatter={(value, entry: LegendPayload) => (
-                <span className="text-sm">{entry.payload.label}</span>
-              )}
+              formatter={(value, entry) => {
+                const categoryData = entry.payload as unknown as CategoryData;
+                return <span className="text-sm">{categoryData.label}</span>;
+              }}
             />
           </PieChart>
         </ResponsiveContainer>
