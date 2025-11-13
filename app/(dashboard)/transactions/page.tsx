@@ -3,7 +3,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Search, Filter } from "lucide-react";
+import { Search } from "lucide-react";
 
 // Mock data
 const MOCK_TRANSACTIONS = [

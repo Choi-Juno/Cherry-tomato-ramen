@@ -12,7 +12,7 @@ export default function DashboardLayout({
 }) {
   const [isExpenseModalOpen, setIsExpenseModalOpen] = useState(false);
 
-  const handleExpenseSubmit = async (data: any) => {
+  const handleExpenseSubmit = async (data: unknown) => {
     // TODO: Implement actual API call
     console.log("Submitting expense:", data);
     // Simulate API call

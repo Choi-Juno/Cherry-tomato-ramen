@@ -2,7 +2,7 @@ import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
 import { SpendingChart } from "@/components/dashboard/SpendingChart";
 import { CategoryAnalysis } from "@/components/dashboard/CategoryAnalysis";
 import { AIInsightCard } from "@/components/insights/AIInsightCard";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatShortDate } from "@/lib/utils";
 import { AIInsight } from "@/types/insight";
