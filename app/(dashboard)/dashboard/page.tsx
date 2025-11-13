@@ -89,12 +89,17 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-4 md:space-y-8">
+    <div className="space-y-5">
       {/* Page Header */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">대시보드</h1>
-        <p className="text-sm md:text-base text-slate-600 mt-1">
-          이번 달 소비 현황을 한눈에 확인하세요
+      <div className="pt-2">
+        <div className="flex items-center justify-between mb-1">
+          <h1 className="text-2xl font-bold text-slate-900">안녕하세요 👋</h1>
+          <div className="text-xs text-slate-500">
+            {new Date().toLocaleDateString('ko-KR', { month: 'long', day: 'numeric' })}
+          </div>
+        </div>
+        <p className="text-sm text-slate-600">
+          오늘도 현명한 소비 하세요!
         </p>
       </div>
 
@@ -102,18 +107,20 @@ export default function DashboardPage() {
       <SpendingSummary {...MOCK_SUMMARY} />
 
       {/* Charts Section */}
-      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
+      <div className="space-y-4">
         <SpendingChart data={MOCK_SPENDING_TREND} title="주간 소비 추이" type="bar" />
         <CategoryAnalysis data={MOCK_CATEGORY_DATA} />
       </div>
 
       {/* AI Insights Section */}
       <section>
-        <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-900">AI 인사이트</h2>
-          <Badge variant="default" className="text-xs">New</Badge>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-center gap-2">
+            <h2 className="text-xl font-bold text-slate-900">AI 인사이트</h2>
+            <Badge variant="default" className="text-[10px] px-2 py-0.5">New</Badge>
+          </div>
         </div>
-        <div className="grid gap-3 md:gap-4 md:grid-cols-2">
+        <div className="space-y-3">
           {MOCK_INSIGHTS.map((insight) => (
             <AIInsightCard key={insight.id} insight={insight} />
           ))}
@@ -122,43 +129,44 @@ export default function DashboardPage() {
 
       {/* Recent Transactions */}
       <section>
-        <div className="flex items-center justify-between mb-3 md:mb-4">
-          <h2 className="text-xl md:text-2xl font-bold text-slate-900">최근 내역</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-xl font-bold text-slate-900">최근 내역</h2>
           <a
             href="/transactions"
-            className="text-sm font-medium text-violet-600 active:text-violet-700 md:hover:text-violet-700"
+            className="text-sm font-semibold text-violet-600 active:text-violet-700 flex items-center gap-1"
           >
-            전체 보기 →
+            전체보기 
+            <span className="text-xs">→</span>
           </a>
         </div>
-        <Card>
+        <Card className="overflow-hidden shadow-sm">
           <CardContent className="p-0">
-            <div className="divide-y divide-slate-200">
+            <div className="divide-y divide-slate-100">
               {MOCK_RECENT_TRANSACTIONS.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-3 md:p-4 active:bg-slate-50 md:hover:bg-slate-50 transition-colors"
+                  className="flex items-center justify-between p-4 active:bg-slate-50 transition-colors"
                 >
-                  <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 md:h-11 md:w-11 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
-                      <span className="text-lg md:text-xl">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <span className="text-xl">
                         {transaction.category === "food" && "🍽️"}
                         {transaction.category === "transport" && "🚗"}
                         {transaction.category === "shopping" && "🛍️"}
                         {transaction.category === "entertainment" && "🎬"}
                       </span>
                     </div>
-                    <div className="min-w-0">
-                      <p className="font-medium text-slate-900 text-sm md:text-base">
+                    <div className="flex-1 min-w-0">
+                      <p className="font-semibold text-slate-900 text-sm truncate">
                         {transaction.description}
                       </p>
-                      <p className="text-xs md:text-sm text-slate-500 truncate">
+                      <p className="text-xs text-slate-500 truncate">
                         {CATEGORY_LABELS[transaction.category]} • {formatShortDate(transaction.date)}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <p className="font-semibold text-slate-900 text-sm md:text-base">
+                  <div className="text-right flex-shrink-0 ml-3">
+                    <p className="font-bold text-slate-900 text-base">
                       {formatCurrency(transaction.amount)}
                     </p>
                   </div>

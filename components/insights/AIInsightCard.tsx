@@ -57,44 +57,45 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
   const Icon = config.icon;
 
   return (
-    <Card className="active:shadow-md md:hover:shadow-md transition-shadow">
-      <CardContent className="p-3 md:p-4">
-        <div className="flex items-start gap-2 md:gap-3">
+    <Card className="active:scale-[0.98] transition-transform shadow-sm">
+      <CardContent className="p-4">
+        <div className="flex items-start gap-3">
           {/* Icon */}
-          <div className={cn("rounded-lg p-1.5 md:p-2 flex-shrink-0", config.bgColor)}>
-            <Icon className={cn("h-4 w-4 md:h-5 md:w-5", config.color)} />
+          <div className={cn("rounded-xl p-2.5 flex-shrink-0 shadow-sm", config.bgColor)}>
+            <Icon className={cn("h-5 w-5", config.color)} />
           </div>
 
           {/* Content */}
-          <div className="flex-1 space-y-1.5 md:space-y-2 min-w-0">
+          <div className="flex-1 space-y-2 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-sm md:text-base text-slate-900 leading-tight">
+              <h3 className="font-bold text-sm text-slate-900 leading-tight">
                 {insight.title}
               </h3>
-              <Badge variant={SEVERITY_VARIANTS[insight.severity]} className="shrink-0 text-[10px] md:text-xs">
+              <Badge variant={SEVERITY_VARIANTS[insight.severity]} className="shrink-0 text-[9px] px-2 py-0.5">
                 {insight.severity === "info" && "정보"}
                 {insight.severity === "warning" && "주의"}
                 {insight.severity === "critical" && "경고"}
               </Badge>
             </div>
 
-            <p className="text-xs md:text-sm text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 leading-relaxed">
               {insight.description}
             </p>
 
             {insight.suggested_action && (
-              <div className="rounded-lg bg-slate-50 p-2 md:p-3">
-                <p className="text-xs md:text-sm text-slate-700 leading-relaxed">
-                  💡 <span className="font-medium">제안:</span>{" "}
+              <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 p-3 border border-violet-100">
+                <p className="text-xs text-slate-700 leading-relaxed">
+                  <span className="font-bold">💡 AI 제안</span>
+                  <br />
                   {insight.suggested_action}
                 </p>
               </div>
             )}
 
             {insight.potential_savings && insight.potential_savings > 0 && (
-              <div className="flex items-center gap-2 text-xs md:text-sm">
-                <span className="text-slate-600">절약 가능 금액:</span>
-                <span className="font-bold text-emerald-600">
+              <div className="flex items-center gap-2 text-xs bg-emerald-50 rounded-lg px-3 py-2">
+                <span className="text-emerald-700 font-medium">💰 절약 가능</span>
+                <span className="font-bold text-emerald-600 text-sm">
                   {formatCurrency(insight.potential_savings)}
                 </span>
               </div>

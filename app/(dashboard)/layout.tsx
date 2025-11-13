@@ -20,9 +20,9 @@ export default function DashboardLayout({
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
       <Navigation />
-      <main className="mx-auto max-w-7xl px-4 py-4 pb-20 md:px-6 md:py-8 md:pb-8 lg:px-8">
+      <main className="px-4 py-4 pb-24">
         {children}
       </main>
       <FAB onClick={() => setIsExpenseModalOpen(true)} />

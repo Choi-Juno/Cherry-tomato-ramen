@@ -109,18 +109,18 @@ export function ExpenseInputModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="text-lg md:text-xl">지출 기록하기</DialogTitle>
-          <DialogDescription className="text-sm">
-            오늘의 지출을 간편하게 기록하세요
+      <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader className="text-left pb-2">
+          <DialogTitle className="text-xl font-bold">💰 지출 기록하기</DialogTitle>
+          <DialogDescription className="text-sm text-slate-600">
+            간편하게 오늘의 소비를 기록해보세요
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-3 md:space-y-4">
-          {/* Amount */}
-          <div className="space-y-1.5 md:space-y-2">
-            <label htmlFor="amount" className="text-sm font-medium">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+          {/* Amount - Highlighted */}
+          <div className="space-y-2">
+            <label htmlFor="amount" className="text-sm font-semibold text-slate-700">
               금액 *
             </label>
             <Input
@@ -128,16 +128,18 @@ export function ExpenseInputModal({
               type="number"
               placeholder="10,000"
               {...register("amount", { valueAsNumber: true })}
-              className="text-base md:text-lg h-12"
+              className="text-xl font-bold h-14 border-2 focus:border-violet-500"
             />
             {errors.amount && (
-              <p className="text-xs md:text-sm text-red-500">{errors.amount.message}</p>
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                ⚠️ {errors.amount.message}
+              </p>
             )}
           </div>
 
           {/* Description */}
-          <div className="space-y-1.5 md:space-y-2">
-            <label htmlFor="description" className="text-sm font-medium">
+          <div className="space-y-2">
+            <label htmlFor="description" className="text-sm font-semibold text-slate-700">
               내용 *
             </label>
             <Input
@@ -147,94 +149,104 @@ export function ExpenseInputModal({
               className="h-12"
             />
             {errors.description && (
-              <p className="text-xs md:text-sm text-red-500">
-                {errors.description.message}
+              <p className="text-xs text-red-500 flex items-center gap-1">
+                ⚠️ {errors.description.message}
               </p>
             )}
           </div>
 
-          {/* Category */}
-          <div className="space-y-1.5 md:space-y-2">
-            <label htmlFor="category" className="text-sm font-medium">
-              카테고리 *
-            </label>
-            <Select
-              value={watch("category")}
-              onValueChange={(value) =>
-                setValue("category", value as TransactionCategory)
-              }
-            >
-              <SelectTrigger className="h-12">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value} className="py-3">
-                    {cat.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          {/* Category & Payment Method Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Category */}
+            <div className="space-y-2">
+              <label htmlFor="category" className="text-sm font-semibold text-slate-700">
+                카테고리 *
+              </label>
+              <Select
+                value={watch("category")}
+                onValueChange={(value) =>
+                  setValue("category", value as TransactionCategory)
+                }
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {CATEGORIES.map((cat) => (
+                    <SelectItem key={cat.value} value={cat.value} className="py-3.5">
+                      {cat.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Payment Method */}
+            <div className="space-y-2">
+              <label htmlFor="payment_method" className="text-sm font-semibold text-slate-700">
+                결제 수단 *
+              </label>
+              <Select
+                value={watch("payment_method")}
+                onValueChange={(value) =>
+                  setValue("payment_method", value as PaymentMethod)
+                }
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PAYMENT_METHODS.map((method) => (
+                    <SelectItem key={method.value} value={method.value} className="py-3.5">
+                      {method.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          {/* Payment Method */}
-          <div className="space-y-1.5 md:space-y-2">
-            <label htmlFor="payment_method" className="text-sm font-medium">
-              결제 수단 *
-            </label>
-            <Select
-              value={watch("payment_method")}
-              onValueChange={(value) =>
-                setValue("payment_method", value as PaymentMethod)
-              }
-            >
-              <SelectTrigger className="h-12">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {PAYMENT_METHODS.map((method) => (
-                  <SelectItem key={method.value} value={method.value} className="py-3">
-                    {method.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Merchant & Date Grid */}
+          <div className="grid grid-cols-2 gap-3">
+            {/* Merchant (Optional) */}
+            <div className="space-y-2">
+              <label htmlFor="merchant" className="text-sm font-medium text-slate-700">
+                장소
+              </label>
+              <Input
+                id="merchant"
+                placeholder="스타벅스"
+                {...register("merchant")}
+                className="h-12"
+              />
+            </div>
 
-          {/* Merchant (Optional) */}
-          <div className="space-y-1.5 md:space-y-2">
-            <label htmlFor="merchant" className="text-sm font-medium">
-              장소 (선택)
-            </label>
-            <Input
-              id="merchant"
-              placeholder="스타벅스"
-              {...register("merchant")}
-              className="h-12"
-            />
-          </div>
-
-          {/* Date */}
-          <div className="space-y-1.5 md:space-y-2">
-            <label htmlFor="date" className="text-sm font-medium">
-              날짜 *
-            </label>
-            <Input id="date" type="date" {...register("date")} className="h-12" />
+            {/* Date */}
+            <div className="space-y-2">
+              <label htmlFor="date" className="text-sm font-semibold text-slate-700">
+                날짜 *
+              </label>
+              <Input id="date" type="date" {...register("date")} className="h-12" />
+            </div>
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex gap-2 pt-2 md:pt-4">
+          <div className="flex gap-3 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="flex-1 h-12"
+              className="flex-1 h-13 font-semibold"
               disabled={isSubmitting}
             >
               취소
             </Button>
-            <Button type="submit" className="flex-1 h-12" disabled={isSubmitting}>
-              {isSubmitting ? "저장 중..." : "저장"}
+            <Button 
+              type="submit" 
+              className="flex-1 h-13 font-semibold bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg" 
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? "저장 중..." : "저장하기"}
             </Button>
           </div>
         </form>
