@@ -80,10 +80,22 @@ export default function SignupPage() {
       const data = await response.json();
 
       if (!response.ok) {
+        let errorMessage = data.error || "알 수 없는 오류가 발생했습니다.";
+        
+        // Rate limit 에러 감지
+        if (errorMessage.includes("16 seconds") || errorMessage.includes("rate limit")) {
+          errorMessage = "너무 빠르게 요청했습니다. 잠시 후(16초) 다시 시도해주세요.";
+        }
+        // 이미 가입된 이메일
+        else if (errorMessage.includes("already registered") || errorMessage.includes("already exists")) {
+          errorMessage = "이미 가입된 이메일입니다. 로그인 페이지로 이동하세요.";
+        }
+        
         addToast({
           title: "회원가입 실패",
-          description: data.error || "알 수 없는 오류가 발생했습니다.",
+          description: errorMessage,
           variant: "error",
+          duration: 5000,
         });
         return;
       }
