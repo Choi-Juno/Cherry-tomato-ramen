@@ -17,10 +17,6 @@ const TransactionsContext = createContext<TransactionsContextType | undefined>(
   undefined
 );
 
-// Mock User ID (인증 구현 전까지 사용)
-// scripts/seed-test-user.ts에서 생성된 실제 사용자 ID
-const MOCK_USER_ID = "8140d257-f25a-48d0-a38a-47d90850689a";
-
 export function TransactionsProvider({
   children,
 }: {
@@ -28,17 +24,31 @@ export function TransactionsProvider({
 }) {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
   const supabase = createClient();
+
+  // 인증된 사용자 ID 가져오기
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+      }
+    };
+    getUser();
+  }, [supabase]);
 
   // 초기 데이터 로드
   const refreshTransactions = useCallback(async () => {
+    if (!userId) return;
+    
     try {
       setIsLoading(true);
       
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
-        .eq("user_id", MOCK_USER_ID)
+        .eq("user_id", userId)
         .order("date", { ascending: false })
         .order("created_at", { ascending: false });
 
@@ -53,20 +63,26 @@ export function TransactionsProvider({
     } finally {
       setIsLoading(false);
     }
-  }, [supabase]);
+  }, [userId, supabase]);
 
-  // 컴포넌트 마운트 시 데이터 로드
+  // userId가 설정되면 데이터 로드
   useEffect(() => {
-    refreshTransactions();
-  }, [refreshTransactions]);
+    if (userId) {
+      refreshTransactions();
+    }
+  }, [userId, refreshTransactions]);
 
   const addTransaction = useCallback(
     async (input: CreateTransactionInput) => {
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+      
       try {
         setIsLoading(true);
 
         const newTransaction = {
-          user_id: MOCK_USER_ID,
+          user_id: userId,
           ...input,
         };
 
@@ -90,11 +106,15 @@ export function TransactionsProvider({
         setIsLoading(false);
       }
     },
-    [supabase]
+    [userId, supabase]
   );
 
   const updateTransaction = useCallback(
     async (id: string, data: Partial<Transaction>) => {
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+      
       try {
         setIsLoading(true);
 
@@ -102,7 +122,7 @@ export function TransactionsProvider({
           .from("transactions")
           .update(data)
           .eq("id", id)
-          .eq("user_id", MOCK_USER_ID);
+          .eq("user_id", userId);
 
         if (error) {
           console.error("Failed to update transaction:", error);
@@ -124,11 +144,15 @@ export function TransactionsProvider({
         setIsLoading(false);
       }
     },
-    [supabase]
+    [userId, supabase]
   );
 
   const deleteTransaction = useCallback(
     async (id: string) => {
+      if (!userId) {
+        throw new Error("User not authenticated");
+      }
+      
       try {
         setIsLoading(true);
 
@@ -136,7 +160,7 @@ export function TransactionsProvider({
           .from("transactions")
           .delete()
           .eq("id", id)
-          .eq("user_id", MOCK_USER_ID);
+          .eq("user_id", userId);
 
         if (error) {
           console.error("Failed to delete transaction:", error);
@@ -152,7 +176,7 @@ export function TransactionsProvider({
         setIsLoading(false);
       }
     },
-    [supabase]
+    [userId, supabase]
   );
 
   return (

@@ -1,9 +1,12 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Home, Receipt, Sparkles, Target, User } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { Home, Receipt, Sparkles, Target, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
+import { Button } from "@/components/ui/button";
 
 const NAV_ITEMS = [
   {
@@ -35,6 +38,34 @@ const NAV_ITEMS = [
 
 export function Navigation() {
   const pathname = usePathname();
+  const router = useRouter();
+  const supabase = createClient();
+  
+  const [showProfileMenu, setShowProfileMenu] = useState(false);
+  const [userEmail, setUserEmail] = useState<string | null>(null);
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserEmail(user.email || null);
+      }
+    };
+    getUser();
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
+
+  const getUserInitial = () => {
+    if (userEmail) {
+      return userEmail.charAt(0).toUpperCase();
+    }
+    return "U";
+  };
 
   return (
     <>
@@ -47,9 +78,48 @@ export function Navigation() {
               소비 코치
             </span>
           </Link>
-          <button className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md active:scale-95 transition-transform">
-            <span className="text-xs font-bold">김</span>
-          </button>
+          
+          {/* Profile Button with Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setShowProfileMenu(!showProfileMenu)}
+              className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md active:scale-95 transition-transform"
+            >
+              <span className="text-xs font-bold">{getUserInitial()}</span>
+            </button>
+
+            {/* Dropdown Menu */}
+            {showProfileMenu && (
+              <>
+                {/* Backdrop */}
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setShowProfileMenu(false)}
+                />
+                
+                {/* Menu */}
+                <div className="absolute right-0 top-12 z-50 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
+                  <div className="p-4 border-b border-slate-200 bg-gradient-to-br from-violet-50 to-purple-50">
+                    <p className="text-xs text-slate-600 mb-1">로그인 계정</p>
+                    <p className="text-sm font-semibold text-slate-900 truncate">
+                      {userEmail || "사용자"}
+                    </p>
+                  </div>
+                  
+                  <div className="p-2">
+                    <Button
+                      onClick={handleLogout}
+                      variant="ghost"
+                      className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                    >
+                      <LogOut className="h-4 w-4 mr-2" />
+                      로그아웃
+                    </Button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
