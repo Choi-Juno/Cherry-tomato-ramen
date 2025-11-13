@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, CreateTransactionInput } from "@/types/transaction";
 
@@ -10,7 +10,7 @@ export function useTransactions() {
   const [error, setError] = useState<Error | null>(null);
   const supabase = createClient();
 
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -25,7 +25,7 @@ export function useTransactions() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   const addTransaction = async (input: CreateTransactionInput) => {
     try {
@@ -86,7 +86,7 @@ export function useTransactions() {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [fetchTransactions]);
 
   return {
     transactions,

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AIInsight } from "@/types/insight";
 
@@ -10,7 +10,7 @@ export function useInsights() {
   const [error, setError] = useState<Error | null>(null);
   const supabase = createClient();
 
-  const fetchInsights = async () => {
+  const fetchInsights = useCallback(async () => {
     try {
       setLoading(true);
       const now = new Date().toISOString();
@@ -29,7 +29,7 @@ export function useInsights() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [supabase]);
 
   const generateInsights = async () => {
     try {
@@ -49,7 +49,7 @@ export function useInsights() {
 
   useEffect(() => {
     fetchInsights();
-  }, []);
+  }, [fetchInsights]);
 
   return {
     insights,

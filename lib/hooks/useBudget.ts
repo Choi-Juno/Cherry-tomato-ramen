@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Budget, CreateBudgetInput } from "@/types/budget";
 
@@ -14,7 +14,7 @@ export function useBudget(month?: string) {
   const targetMonth =
     month || new Date().toISOString().slice(0, 7); // YYYY-MM
 
-  const fetchBudgets = async () => {
+  const fetchBudgets = useCallback(async () => {
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -29,7 +29,7 @@ export function useBudget(month?: string) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [targetMonth, supabase]);
 
   const setBudget = async (input: CreateBudgetInput) => {
     try {
@@ -83,7 +83,7 @@ export function useBudget(month?: string) {
 
   useEffect(() => {
     fetchBudgets();
-  }, [targetMonth]);
+  }, [fetchBudgets]);
 
   return {
     budgets,
