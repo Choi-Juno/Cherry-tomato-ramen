@@ -11,6 +11,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   Legend,
+  TooltipProps,
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
@@ -27,24 +28,26 @@ interface SpendingChartProps {
   type?: "line" | "bar";
 }
 
+// CustomTooltip 컴포넌트를 외부로 이동
+function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
+  if (active && payload && payload.length) {
+    return (
+      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
+        <p className="text-sm font-medium">{payload[0].payload.label || payload[0].payload.date}</p>
+        <p className="text-sm text-violet-600 font-semibold">
+          {formatCurrency(payload[0].value as number)}
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
 export function SpendingChart({
   data,
   title = "소비 추이",
   type = "line",
 }: SpendingChartProps) {
-  const CustomTooltip = ({ active, payload }: any) => {
-    if (active && payload && payload.length) {
-      return (
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-          <p className="text-sm font-medium">{payload[0].payload.label || payload[0].payload.date}</p>
-          <p className="text-sm text-violet-600 font-semibold">
-            {formatCurrency(payload[0].value)}
-          </p>
-        </div>
-      );
-    }
-    return null;
-  };
 
   return (
     <Card>

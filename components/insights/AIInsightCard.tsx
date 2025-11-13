@@ -1,6 +1,6 @@
 "use client";
 
-import { AlertTriangle, TrendingUp, TrendingDown, Lightbulb, Info } from "lucide-react";
+import { AlertTriangle, TrendingUp, TrendingDown, Lightbulb, Info, LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { AIInsight, InsightType, InsightSeverity } from "@/types/insight";
@@ -12,7 +12,7 @@ interface AIInsightCardProps {
 
 const INSIGHT_CONFIG: Record<
   InsightType,
-  { icon: any; color: string; bgColor: string }
+  { icon: LucideIcon; color: string; bgColor: string }
 > = {
   overspending: {
     icon: AlertTriangle,
