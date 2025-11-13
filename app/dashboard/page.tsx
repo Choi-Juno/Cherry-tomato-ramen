@@ -210,17 +210,17 @@ export default function DashboardPage() {
             {/* Page Header */}
             <div className="pt-2">
                 <div className="flex items-center justify-between mb-1">
-                    <h1 className="text-2xl font-bold text-slate-900">
+                    <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                         안녕하세요 👋
                     </h1>
-                    <div className="text-xs text-slate-500">
+                    <div className="text-xs text-slate-500 dark:text-slate-400">
                         {new Date().toLocaleDateString("ko-KR", {
                             month: "long",
                             day: "numeric",
                         })}
                     </div>
                 </div>
-                <p className="text-sm text-slate-600">
+                <p className="text-sm text-slate-600 dark:text-slate-400">
                     오늘도 현명한 소비 하세요!
                 </p>
             </div>
@@ -246,7 +246,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardContent className="p-12 text-center">
                             <div className="text-4xl mb-3">📊</div>
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                                 지출을 추가하면 카테고리별 분석이 표시됩니다
                             </p>
                         </CardContent>
@@ -258,7 +258,7 @@ export default function DashboardPage() {
             <section>
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-slate-900">
+                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                             AI 인사이트
                         </h2>
                         <Badge
@@ -274,16 +274,16 @@ export default function DashboardPage() {
                     <Card>
                         <CardContent className="p-12 text-center">
                             <div className="text-4xl mb-3">🤖</div>
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                                 AI가 당신의 소비 패턴을 분석하고 있습니다...
                             </p>
                         </CardContent>
                     </Card>
                 ) : insightsError ? (
-                    <Card className="border-red-200 bg-red-50">
+                    <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
                         <CardContent className="p-6 text-center">
                             <div className="text-3xl mb-2">⚠️</div>
-                            <p className="text-sm text-red-700">
+                            <p className="text-sm text-red-700 dark:text-red-300">
                                 {insightsError}
                             </p>
                         </CardContent>
@@ -292,7 +292,7 @@ export default function DashboardPage() {
                     <Card>
                         <CardContent className="p-12 text-center">
                             <div className="text-4xl mb-3">💡</div>
-                            <p className="text-sm text-slate-600">
+                            <p className="text-sm text-slate-600 dark:text-slate-400">
                                 {transactions.length === 0
                                     ? "지출 내역을 추가하면 AI가 인사이트를 제공합니다"
                                     : "현재 특별한 인사이트가 없습니다. 계속 현명한 소비를 하세요!"}
@@ -307,7 +307,7 @@ export default function DashboardPage() {
                         {aiInsights.length > 3 && (
                             <a
                                 href="/dashboard/insights"
-                                className="block text-center py-3 text-sm font-semibold text-violet-600 hover:text-violet-700 active:text-violet-800"
+                                className="block text-center py-3 text-sm font-semibold text-violet-600 hover:text-violet-700 active:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
                             >
                                 전체 인사이트 보기 ({aiInsights.length}개) →
                             </a>
@@ -319,12 +319,12 @@ export default function DashboardPage() {
             {/* Recent Transactions - 실제 데이터 사용 */}
             <section>
                 <div className="flex items-center justify-between mb-3">
-                    <h2 className="text-xl font-bold text-slate-900">
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
                         최근 내역
                     </h2>
                     <a
                         href="/dashboard/transactions"
-                        className="text-sm font-semibold text-violet-600 active:text-violet-700 flex items-center gap-1"
+                        className="text-sm font-semibold text-violet-600 active:text-violet-700 dark:text-violet-400 dark:active:text-violet-300 flex items-center gap-1"
                     >
                         전체보기
                         <span className="text-xs">→</span>
@@ -335,10 +335,10 @@ export default function DashboardPage() {
                     <Card className="overflow-hidden shadow-sm">
                         <CardContent className="p-12 text-center">
                             <div className="text-5xl mb-4">📝</div>
-                            <h3 className="text-lg font-bold text-slate-900 mb-2">
+                            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
                                 아직 지출 내역이 없어요
                             </h3>
-                            <p className="text-sm text-slate-600 mb-4">
+                            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
                                 우측 하단 + 버튼을 눌러 첫 지출을 기록해보세요!
                             </p>
                         </CardContent>
@@ -346,14 +346,14 @@ export default function DashboardPage() {
                 ) : (
                     <Card className="overflow-hidden shadow-sm">
                         <CardContent className="p-0">
-                            <div className="divide-y divide-slate-100">
+                            <div className="divide-y divide-slate-100 dark:divide-slate-700">
                                 {recentTransactions.map((transaction) => (
                                     <div
                                         key={transaction.id}
-                                        className="flex items-center justify-between p-4 active:bg-slate-50 transition-colors"
+                                        className="flex items-center justify-between p-4 active:bg-slate-50 dark:active:bg-slate-700 transition-colors"
                                     >
                                         <div className="flex items-center gap-3 flex-1 min-w-0">
-                                            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                                            <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 flex items-center justify-center flex-shrink-0 shadow-sm">
                                                 <span className="text-xl">
                                                     {categoryIcons[
                                                         transaction.category
@@ -361,10 +361,10 @@ export default function DashboardPage() {
                                                 </span>
                                             </div>
                                             <div className="flex-1 min-w-0">
-                                                <p className="font-semibold text-slate-900 text-sm truncate">
+                                                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">
                                                     {transaction.description}
                                                 </p>
-                                                <p className="text-xs text-slate-500 truncate">
+                                                <p className="text-xs text-slate-500 dark:text-slate-400 truncate">
                                                     {
                                                         CATEGORY_LABELS[
                                                             transaction.category
@@ -380,7 +380,7 @@ export default function DashboardPage() {
                                             </div>
                                         </div>
                                         <div className="text-right flex-shrink-0 ml-3">
-                                            <p className="font-bold text-slate-900 text-base">
+                                            <p className="font-bold text-slate-900 dark:text-slate-100 text-base">
                                                 {formatCurrency(
                                                     transaction.amount
                                                 )}
