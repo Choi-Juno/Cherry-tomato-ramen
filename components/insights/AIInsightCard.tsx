@@ -57,32 +57,34 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
   const Icon = config.icon;
 
   return (
-    <Card className="hover:shadow-md transition-shadow">
-      <CardContent className="p-4">
-        <div className="flex items-start gap-3">
+    <Card className="active:shadow-md md:hover:shadow-md transition-shadow">
+      <CardContent className="p-3 md:p-4">
+        <div className="flex items-start gap-2 md:gap-3">
           {/* Icon */}
-          <div className={cn("rounded-lg p-2", config.bgColor)}>
-            <Icon className={cn("h-5 w-5", config.color)} />
+          <div className={cn("rounded-lg p-1.5 md:p-2 flex-shrink-0", config.bgColor)}>
+            <Icon className={cn("h-4 w-4 md:h-5 md:w-5", config.color)} />
           </div>
 
           {/* Content */}
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 space-y-1.5 md:space-y-2 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-semibold text-slate-900">{insight.title}</h3>
-              <Badge variant={SEVERITY_VARIANTS[insight.severity]} className="shrink-0">
+              <h3 className="font-semibold text-sm md:text-base text-slate-900 leading-tight">
+                {insight.title}
+              </h3>
+              <Badge variant={SEVERITY_VARIANTS[insight.severity]} className="shrink-0 text-[10px] md:text-xs">
                 {insight.severity === "info" && "정보"}
                 {insight.severity === "warning" && "주의"}
                 {insight.severity === "critical" && "경고"}
               </Badge>
             </div>
 
-            <p className="text-sm text-slate-600 leading-relaxed">
+            <p className="text-xs md:text-sm text-slate-600 leading-relaxed">
               {insight.description}
             </p>
 
             {insight.suggested_action && (
-              <div className="rounded-lg bg-slate-50 p-3">
-                <p className="text-sm text-slate-700">
+              <div className="rounded-lg bg-slate-50 p-2 md:p-3">
+                <p className="text-xs md:text-sm text-slate-700 leading-relaxed">
                   💡 <span className="font-medium">제안:</span>{" "}
                   {insight.suggested_action}
                 </p>
@@ -90,7 +92,7 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
             )}
 
             {insight.potential_savings && insight.potential_savings > 0 && (
-              <div className="flex items-center gap-2 text-sm">
+              <div className="flex items-center gap-2 text-xs md:text-sm">
                 <span className="text-slate-600">절약 가능 금액:</span>
                 <span className="font-bold text-emerald-600">
                   {formatCurrency(insight.potential_savings)}

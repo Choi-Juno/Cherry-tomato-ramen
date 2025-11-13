@@ -109,17 +109,17 @@ export function ExpenseInputModal({
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>지출 기록하기</DialogTitle>
-          <DialogDescription>
+          <DialogTitle className="text-lg md:text-xl">지출 기록하기</DialogTitle>
+          <DialogDescription className="text-sm">
             오늘의 지출을 간편하게 기록하세요
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-3 md:space-y-4">
           {/* Amount */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 md:space-y-2">
             <label htmlFor="amount" className="text-sm font-medium">
               금액 *
             </label>
@@ -128,15 +128,15 @@ export function ExpenseInputModal({
               type="number"
               placeholder="10,000"
               {...register("amount", { valueAsNumber: true })}
-              className="text-lg"
+              className="text-base md:text-lg h-12"
             />
             {errors.amount && (
-              <p className="text-sm text-red-500">{errors.amount.message}</p>
+              <p className="text-xs md:text-sm text-red-500">{errors.amount.message}</p>
             )}
           </div>
 
           {/* Description */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 md:space-y-2">
             <label htmlFor="description" className="text-sm font-medium">
               내용 *
             </label>
@@ -144,16 +144,17 @@ export function ExpenseInputModal({
               id="description"
               placeholder="점심 식사"
               {...register("description")}
+              className="h-12"
             />
             {errors.description && (
-              <p className="text-sm text-red-500">
+              <p className="text-xs md:text-sm text-red-500">
                 {errors.description.message}
               </p>
             )}
           </div>
 
           {/* Category */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 md:space-y-2">
             <label htmlFor="category" className="text-sm font-medium">
               카테고리 *
             </label>
@@ -163,12 +164,12 @@ export function ExpenseInputModal({
                 setValue("category", value as TransactionCategory)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {CATEGORIES.map((cat) => (
-                  <SelectItem key={cat.value} value={cat.value}>
+                  <SelectItem key={cat.value} value={cat.value} className="py-3">
                     {cat.label}
                   </SelectItem>
                 ))}
@@ -177,7 +178,7 @@ export function ExpenseInputModal({
           </div>
 
           {/* Payment Method */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 md:space-y-2">
             <label htmlFor="payment_method" className="text-sm font-medium">
               결제 수단 *
             </label>
@@ -187,12 +188,12 @@ export function ExpenseInputModal({
                 setValue("payment_method", value as PaymentMethod)
               }
             >
-              <SelectTrigger>
+              <SelectTrigger className="h-12">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
                 {PAYMENT_METHODS.map((method) => (
-                  <SelectItem key={method.value} value={method.value}>
+                  <SelectItem key={method.value} value={method.value} className="py-3">
                     {method.label}
                   </SelectItem>
                 ))}
@@ -201,7 +202,7 @@ export function ExpenseInputModal({
           </div>
 
           {/* Merchant (Optional) */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 md:space-y-2">
             <label htmlFor="merchant" className="text-sm font-medium">
               장소 (선택)
             </label>
@@ -209,29 +210,30 @@ export function ExpenseInputModal({
               id="merchant"
               placeholder="스타벅스"
               {...register("merchant")}
+              className="h-12"
             />
           </div>
 
           {/* Date */}
-          <div className="space-y-2">
+          <div className="space-y-1.5 md:space-y-2">
             <label htmlFor="date" className="text-sm font-medium">
               날짜 *
             </label>
-            <Input id="date" type="date" {...register("date")} />
+            <Input id="date" type="date" {...register("date")} className="h-12" />
           </div>
 
           {/* Submit Buttons */}
-          <div className="flex gap-2 pt-4">
+          <div className="flex gap-2 pt-2 md:pt-4">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
-              className="flex-1"
+              className="flex-1 h-12"
               disabled={isSubmitting}
             >
               취소
             </Button>
-            <Button type="submit" className="flex-1" disabled={isSubmitting}>
+            <Button type="submit" className="flex-1 h-12" disabled={isSubmitting}>
               {isSubmitting ? "저장 중..." : "저장"}
             </Button>
           </div>

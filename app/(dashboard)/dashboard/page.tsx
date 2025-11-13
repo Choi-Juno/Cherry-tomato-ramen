@@ -89,11 +89,11 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function DashboardPage() {
   return (
-    <div className="space-y-8">
+    <div className="space-y-4 md:space-y-8">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-slate-900">대시보드</h1>
-        <p className="text-slate-600 mt-1">
+        <h1 className="text-2xl md:text-3xl font-bold text-slate-900">대시보드</h1>
+        <p className="text-sm md:text-base text-slate-600 mt-1">
           이번 달 소비 현황을 한눈에 확인하세요
         </p>
       </div>
@@ -102,18 +102,18 @@ export default function DashboardPage() {
       <SpendingSummary {...MOCK_SUMMARY} />
 
       {/* Charts Section */}
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-4 md:gap-6 lg:grid-cols-2">
         <SpendingChart data={MOCK_SPENDING_TREND} title="주간 소비 추이" type="bar" />
         <CategoryAnalysis data={MOCK_CATEGORY_DATA} />
       </div>
 
       {/* AI Insights Section */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-slate-900">AI 인사이트</h2>
-          <Badge variant="default">New</Badge>
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900">AI 인사이트</h2>
+          <Badge variant="default" className="text-xs">New</Badge>
         </div>
-        <div className="grid gap-4 md:grid-cols-2">
+        <div className="grid gap-3 md:gap-4 md:grid-cols-2">
           {MOCK_INSIGHTS.map((insight) => (
             <AIInsightCard key={insight.id} insight={insight} />
           ))}
@@ -122,11 +122,11 @@ export default function DashboardPage() {
 
       {/* Recent Transactions */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-2xl font-bold text-slate-900">최근 내역</h2>
+        <div className="flex items-center justify-between mb-3 md:mb-4">
+          <h2 className="text-xl md:text-2xl font-bold text-slate-900">최근 내역</h2>
           <a
             href="/transactions"
-            className="text-sm font-medium text-violet-600 hover:text-violet-700"
+            className="text-sm font-medium text-violet-600 active:text-violet-700 md:hover:text-violet-700"
           >
             전체 보기 →
           </a>
@@ -137,28 +137,28 @@ export default function DashboardPage() {
               {MOCK_RECENT_TRANSACTIONS.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+                  className="flex items-center justify-between p-3 md:p-4 active:bg-slate-50 md:hover:bg-slate-50 transition-colors"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="h-10 w-10 rounded-full bg-violet-100 flex items-center justify-center">
-                      <span className="text-lg">
+                    <div className="h-10 w-10 md:h-11 md:w-11 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
+                      <span className="text-lg md:text-xl">
                         {transaction.category === "food" && "🍽️"}
                         {transaction.category === "transport" && "🚗"}
                         {transaction.category === "shopping" && "🛍️"}
                         {transaction.category === "entertainment" && "🎬"}
                       </span>
                     </div>
-                    <div>
-                      <p className="font-medium text-slate-900">
+                    <div className="min-w-0">
+                      <p className="font-medium text-slate-900 text-sm md:text-base">
                         {transaction.description}
                       </p>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-xs md:text-sm text-slate-500 truncate">
                         {CATEGORY_LABELS[transaction.category]} • {formatShortDate(transaction.date)}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-slate-900">
+                  <div className="text-right flex-shrink-0 ml-2">
+                    <p className="font-semibold text-slate-900 text-sm md:text-base">
                       {formatCurrency(transaction.amount)}
                     </p>
                   </div>
