@@ -1,0 +1,174 @@
+import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
+import { SpendingChart } from "@/components/dashboard/SpendingChart";
+import { CategoryAnalysis } from "@/components/dashboard/CategoryAnalysis";
+import { AIInsightCard } from "@/components/insights/AIInsightCard";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { formatCurrency, formatShortDate } from "@/lib/utils";
+import { AIInsight } from "@/types/insight";
+
+// Mock data - will be replaced with real data from Supabase
+const MOCK_SUMMARY = {
+  totalSpent: 650000,
+  budgetRemaining: 50000,
+  monthlyBudget: 700000,
+  percentageChange: 12.5,
+};
+
+const MOCK_SPENDING_TREND = [
+  { date: "2024-01-01", amount: 50000, label: "1주" },
+  { date: "2024-01-08", amount: 120000, label: "2주" },
+  { date: "2024-01-15", amount: 180000, label: "3주" },
+  { date: "2024-01-22", amount: 200000, label: "4주" },
+  { date: "2024-01-29", amount: 100000, label: "5주" },
+];
+
+const MOCK_CATEGORY_DATA = [
+  { category: "food", amount: 280000, label: "식비" },
+  { category: "transport", amount: 120000, label: "교통비" },
+  { category: "shopping", amount: 150000, label: "쇼핑" },
+  { category: "entertainment", amount: 80000, label: "문화/여가" },
+  { category: "other", amount: 20000, label: "기타" },
+];
+
+const MOCK_INSIGHTS: AIInsight[] = [
+  {
+    id: "1",
+    user_id: "user1",
+    type: "overspending",
+    severity: "warning",
+    title: "식비 지출이 증가하고 있어요",
+    description: "지난달 대비 식비가 15% 증가했습니다. 배달 음식과 카페 이용이 주요 원인입니다.",
+    suggested_action: "주 2회 배달 음식을 줄이면 월 5만원을 절약할 수 있어요",
+    potential_savings: 50000,
+    category: "food",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "2",
+    user_id: "user1",
+    type: "savings_opportunity",
+    severity: "info",
+    title: "교통비 절약 기회",
+    description: "최근 택시 이용이 많았습니다. 대중교통을 이용하면 교통비를 절감할 수 있습니다.",
+    suggested_action: "주 3회 대중교통 이용으로 월 3만원 절약 가능",
+    potential_savings: 30000,
+    category: "transport",
+    created_at: new Date().toISOString(),
+  },
+  {
+    id: "3",
+    user_id: "user1",
+    type: "trend_decrease",
+    severity: "info",
+    title: "쇼핑 지출이 감소했어요! 👏",
+    description: "지난달 대비 쇼핑 지출이 20% 감소했습니다. 잘하고 계세요!",
+    category: "shopping",
+    created_at: new Date().toISOString(),
+  },
+];
+
+const MOCK_RECENT_TRANSACTIONS = [
+  { id: "1", description: "스타벅스", amount: 5500, category: "food", date: new Date() },
+  { id: "2", description: "택시", amount: 12000, category: "transport", date: new Date() },
+  { id: "3", description: "점심 식사", amount: 9000, category: "food", date: new Date() },
+  { id: "4", description: "영화 관람", amount: 15000, category: "entertainment", date: new Date() },
+  { id: "5", description: "편의점", amount: 8500, category: "food", date: new Date() },
+];
+
+const CATEGORY_LABELS: Record<string, string> = {
+  food: "식비",
+  transport: "교통비",
+  shopping: "쇼핑",
+  entertainment: "문화/여가",
+  education: "교육",
+  health: "의료/건강",
+  utilities: "공과금",
+  other: "기타",
+};
+
+export default function DashboardPage() {
+  return (
+    <div className="space-y-8">
+      {/* Page Header */}
+      <div>
+        <h1 className="text-3xl font-bold text-slate-900">대시보드</h1>
+        <p className="text-slate-600 mt-1">
+          이번 달 소비 현황을 한눈에 확인하세요
+        </p>
+      </div>
+
+      {/* Spending Summary Cards */}
+      <SpendingSummary {...MOCK_SUMMARY} />
+
+      {/* Charts Section */}
+      <div className="grid gap-6 lg:grid-cols-2">
+        <SpendingChart data={MOCK_SPENDING_TREND} title="주간 소비 추이" type="bar" />
+        <CategoryAnalysis data={MOCK_CATEGORY_DATA} />
+      </div>
+
+      {/* AI Insights Section */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-slate-900">AI 인사이트</h2>
+          <Badge variant="default">New</Badge>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          {MOCK_INSIGHTS.map((insight) => (
+            <AIInsightCard key={insight.id} insight={insight} />
+          ))}
+        </div>
+      </section>
+
+      {/* Recent Transactions */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-2xl font-bold text-slate-900">최근 내역</h2>
+          <a
+            href="/transactions"
+            className="text-sm font-medium text-violet-600 hover:text-violet-700"
+          >
+            전체 보기 →
+          </a>
+        </div>
+        <Card>
+          <CardContent className="p-0">
+            <div className="divide-y divide-slate-200">
+              {MOCK_RECENT_TRANSACTIONS.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="h-10 w-10 rounded-full bg-violet-100 flex items-center justify-center">
+                      <span className="text-lg">
+                        {transaction.category === "food" && "🍽️"}
+                        {transaction.category === "transport" && "🚗"}
+                        {transaction.category === "shopping" && "🛍️"}
+                        {transaction.category === "entertainment" && "🎬"}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {transaction.description}
+                      </p>
+                      <p className="text-sm text-slate-500">
+                        {CATEGORY_LABELS[transaction.category]} • {formatShortDate(transaction.date)}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-semibold text-slate-900">
+                      {formatCurrency(transaction.amount)}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </section>
+    </div>
+  );
+}
+
