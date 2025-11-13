@@ -1,7 +1,7 @@
 "use client";
 
 // Force dynamic rendering - don't prerender at build time
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
 import { SpendingChart } from "@/components/dashboard/SpendingChart";

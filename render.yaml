@@ -1,0 +1,17 @@
+services:
+    # ML Service (FastAPI)
+    - type: web
+      name: cherry-tomato-ml
+      runtime: python
+      region: oregon # 무료 티어 지역
+      plan: free
+      rootDir: ml-service
+      buildCommand: pip install -r requirements.txt
+      startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+      envVars:
+          - key: PYTHON_VERSION
+            value: 3.11.0
+          - key: ML_API_SECRET_KEY
+            value: dev-secret-key
+            sync: false # 나중에 Render Dashboard에서 수정 가능
+      healthCheckPath: /health
