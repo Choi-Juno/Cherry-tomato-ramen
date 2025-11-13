@@ -13,5 +13,4 @@ services:
             value: 3.11.0
           - key: ML_API_SECRET_KEY
             value: dev-secret-key
-            sync: false # 나중에 Render Dashboard에서 수정 가능
       healthCheckPath: /health
