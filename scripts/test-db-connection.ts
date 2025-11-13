@@ -23,7 +23,8 @@ if (!supabaseUrl || !supabaseKey) {
 async function testConnection() {
   console.log('🔍 Testing Supabase connection...\n');
   
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  // Non-null assertion is safe here because we already checked above
+  const supabase = createClient(supabaseUrl!, supabaseKey!);
   
   try {
     // Test 1: Fetch categories

@@ -74,12 +74,13 @@ export default function TransactionsPage() {
 
     // 기간 필터
     const now = new Date();
-    const periodDays = {
+    const periodDaysMap: Record<string, number> = {
       week: 7,
       month: 30,
       quarter: 90,
       year: 365,
-    }[periodFilter];
+    };
+    const periodDays = periodDaysMap[periodFilter] || 30; // 기본값 30일
 
     filtered = filtered.filter((t) => {
       const transDate = new Date(t.date);
