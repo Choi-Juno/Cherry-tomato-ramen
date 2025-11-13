@@ -1,21 +1,15 @@
+"use client";
+
+import { useState, useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Search } from "lucide-react";
-
-// Mock data
-const MOCK_TRANSACTIONS = [
-  { id: "1", description: "스타벅스 커피", amount: 5500, category: "food", payment_method: "card", merchant: "스타벅스", date: "2024-01-15" },
-  { id: "2", description: "지하철", amount: 1350, category: "transport", payment_method: "card", merchant: "서울교통공사", date: "2024-01-15" },
-  { id: "3", description: "점심 식사", amount: 9000, category: "food", payment_method: "card", merchant: "맛있는집", date: "2024-01-14" },
-  { id: "4", description: "영화 관람", amount: 15000, category: "entertainment", payment_method: "card", merchant: "CGV", date: "2024-01-13" },
-  { id: "5", description: "편의점", amount: 8500, category: "food", payment_method: "cash", merchant: "GS25", date: "2024-01-13" },
-  { id: "6", description: "택시", amount: 12000, category: "transport", payment_method: "card", merchant: "카카오T", date: "2024-01-12" },
-  { id: "7", description: "온라인 쇼핑", amount: 45000, category: "shopping", payment_method: "card", merchant: "쿠팡", date: "2024-01-10" },
-  { id: "8", description: "저녁 식사", amount: 18000, category: "food", payment_method: "card", merchant: "한식당", date: "2024-01-09" },
-];
+import { Search, Trash2 } from "lucide-react";
+import { useTransactionsStore } from "@/lib/store/transactions-store";
+import { useToast } from "@/components/ui/toast";
 
 const CATEGORY_LABELS: Record<string, string> = {
   food: "식비",
@@ -40,147 +34,257 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function TransactionsPage() {
+  const { transactions, deleteTransaction } = useTransactionsStore();
+  const { addToast } = useToast();
+  
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [periodFilter, setPeriodFilter] = useState("month");
+
+  // 카테고리 아이콘 맵핑
+  const categoryIcons: Record<string, string> = {
+    food: "🍽️",
+    transport: "🚗",
+    shopping: "🛍️",
+    entertainment: "🎬",
+    education: "📚",
+    health: "💊",
+    utilities: "💡",
+    other: "📦",
+  };
+
+  // 필터링된 거래 내역
+  const filteredTransactions = useMemo(() => {
+    let filtered = [...transactions];
+
+    // 검색어 필터
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(
+        (t) =>
+          t.description.toLowerCase().includes(query) ||
+          t.merchant?.toLowerCase().includes(query)
+      );
+    }
+
+    // 카테고리 필터
+    if (categoryFilter !== "all") {
+      filtered = filtered.filter((t) => t.category === categoryFilter);
+    }
+
+    // 기간 필터
+    const now = new Date();
+    const periodDays = {
+      week: 7,
+      month: 30,
+      quarter: 90,
+      year: 365,
+    }[periodFilter];
+
+    filtered = filtered.filter((t) => {
+      const transDate = new Date(t.date);
+      const diffTime = now.getTime() - transDate.getTime();
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      return diffDays <= periodDays;
+    });
+
+    return filtered;
+  }, [transactions, searchQuery, categoryFilter, periodFilter]);
+
+  // 통계 계산
+  const stats = useMemo(() => {
+    const total = filteredTransactions.reduce((sum, t) => sum + t.amount, 0);
+    const count = filteredTransactions.length;
+    const average = count > 0 ? total / count : 0;
+
+    return { total, count, average };
+  }, [filteredTransactions]);
+
+  // 삭제 핸들러
+  const handleDelete = async (id: string, description: string) => {
+    if (confirm(`"${description}" 거래를 삭제하시겠습니까?`)) {
+      try {
+        await deleteTransaction(id);
+        addToast({
+          title: "삭제 완료",
+          description: "거래 내역이 삭제되었습니다.",
+          variant: "success",
+        });
+      } catch (error) {
+        addToast({
+          title: "삭제 실패",
+          description: "거래 삭제 중 오류가 발생했습니다.",
+          variant: "error",
+        });
+      }
+    }
+  };
+
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">거래 내역</h1>
-        <p className="text-slate-600 mt-1">모든 지출 내역을 확인하고 관리하세요</p>
+      <div className="pt-2">
+        <h1 className="text-2xl font-bold text-slate-900">거래 내역</h1>
+        <p className="text-sm text-slate-600 mt-1">
+          모든 지출 내역을 확인하고 관리하세요
+        </p>
       </div>
 
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="flex flex-col gap-3">
             {/* Search */}
-            <div className="flex-1 relative">
+            <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
               <Input
                 placeholder="내용, 장소 검색..."
-                className="pl-10"
+                className="pl-10 h-12"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
               />
             </div>
 
-            {/* Category Filter */}
-            <Select defaultValue="all">
-              <SelectTrigger className="w-full sm:w-[180px]">
-                <SelectValue placeholder="카테고리" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">전체 카테고리</SelectItem>
-                {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
-                  <SelectItem key={value} value={value}>
-                    {label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <div className="grid grid-cols-2 gap-3">
+              {/* Category Filter */}
+              <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="카테고리" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">전체 카테고리</SelectItem>
+                  {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
 
-            {/* Date Filter */}
-            <Select defaultValue="month">
-              <SelectTrigger className="w-full sm:w-[150px]">
-                <SelectValue placeholder="기간" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="week">최근 1주일</SelectItem>
-                <SelectItem value="month">최근 1개월</SelectItem>
-                <SelectItem value="quarter">최근 3개월</SelectItem>
-                <SelectItem value="year">최근 1년</SelectItem>
-              </SelectContent>
-            </Select>
+              {/* Date Filter */}
+              <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="기간" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="week">최근 1주일</SelectItem>
+                  <SelectItem value="month">최근 1개월</SelectItem>
+                  <SelectItem value="quarter">최근 3개월</SelectItem>
+                  <SelectItem value="year">최근 1년</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Summary */}
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid gap-3 grid-cols-3">
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-slate-600">총 거래 건수</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">
-              {MOCK_TRANSACTIONS.length}건
+            <p className="text-xs text-slate-600 mb-1">거래 건수</p>
+            <p className="text-xl font-bold text-slate-900">
+              {stats.count}건
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-slate-600">총 지출 금액</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">
-              {formatCurrency(
-                MOCK_TRANSACTIONS.reduce((sum, t) => sum + t.amount, 0)
-              )}
+            <p className="text-xs text-slate-600 mb-1">총 지출</p>
+            <p className="text-xl font-bold text-slate-900">
+              {formatCurrency(stats.total)}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-sm text-slate-600">평균 지출</p>
-            <p className="text-2xl font-bold text-slate-900 mt-1">
-              {formatCurrency(
-                MOCK_TRANSACTIONS.reduce((sum, t) => sum + t.amount, 0) /
-                  MOCK_TRANSACTIONS.length
-              )}
+            <p className="text-xs text-slate-600 mb-1">평균</p>
+            <p className="text-xl font-bold text-slate-900">
+              {formatCurrency(Math.floor(stats.average))}
             </p>
           </CardContent>
         </Card>
       </div>
 
       {/* Transactions List */}
-      <Card>
-        <CardContent className="p-0">
-          <div className="divide-y divide-slate-200">
-            {MOCK_TRANSACTIONS.map((transaction) => (
-              <div
-                key={transaction.id}
-                className="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors cursor-pointer"
-              >
-                <div className="flex items-center gap-4 flex-1">
-                  <div className="h-12 w-12 rounded-full bg-violet-100 flex items-center justify-center flex-shrink-0">
-                    <span className="text-xl">
-                      {transaction.category === "food" && "🍽️"}
-                      {transaction.category === "transport" && "🚗"}
-                      {transaction.category === "shopping" && "🛍️"}
-                      {transaction.category === "entertainment" && "🎬"}
-                      {transaction.category === "education" && "📚"}
-                      {transaction.category === "health" && "💊"}
-                      {transaction.category === "utilities" && "💡"}
-                      {transaction.category === "other" && "📦"}
-                    </span>
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="font-medium text-slate-900 truncate">
-                        {transaction.description}
-                      </p>
-                      <Badge
-                        className={CATEGORY_COLORS[transaction.category]}
-                        variant="secondary"
-                      >
-                        {CATEGORY_LABELS[transaction.category]}
-                      </Badge>
+      {filteredTransactions.length === 0 ? (
+        <Card>
+          <CardContent className="p-12 text-center">
+            <div className="text-5xl mb-4">🔍</div>
+            <h3 className="text-lg font-bold text-slate-900 mb-2">
+              거래 내역이 없습니다
+            </h3>
+            <p className="text-sm text-slate-600">
+              {searchQuery || categoryFilter !== "all"
+                ? "검색 조건을 변경해보세요"
+                : "우측 하단 + 버튼을 눌러 지출을 추가해보세요"}
+            </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <div className="divide-y divide-slate-100">
+              {filteredTransactions.map((transaction) => (
+                <div
+                  key={transaction.id}
+                  className="flex items-center justify-between p-4 active:bg-slate-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <span className="text-xl">
+                        {categoryIcons[transaction.category] || "📦"}
+                      </span>
                     </div>
-                    <p className="text-sm text-slate-500 mt-1">
-                      {transaction.merchant} • {formatDate(transaction.date)}
-                    </p>
+
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <p className="font-semibold text-slate-900 text-sm truncate">
+                          {transaction.description}
+                        </p>
+                        <Badge
+                          className={CATEGORY_COLORS[transaction.category]}
+                          variant="secondary"
+                        >
+                          {CATEGORY_LABELS[transaction.category]}
+                        </Badge>
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        {transaction.merchant && `${transaction.merchant} • `}
+                        {formatDate(transaction.date)}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 ml-3">
+                    <div className="text-right">
+                      <p className="font-bold text-slate-900 text-base">
+                        {formatCurrency(transaction.amount)}
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {transaction.payment_method === "card" && "카드"}
+                        {transaction.payment_method === "cash" && "현금"}
+                        {transaction.payment_method === "transfer" && "이체"}
+                        {transaction.payment_method === "other" && "기타"}
+                      </p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      onClick={() =>
+                        handleDelete(transaction.id, transaction.description)
+                      }
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-
-                <div className="text-right ml-4">
-                  <p className="font-bold text-slate-900 text-lg">
-                    {formatCurrency(transaction.amount)}
-                  </p>
-                  <p className="text-xs text-slate-500 mt-1">
-                    {transaction.payment_method === "card" && "카드"}
-                    {transaction.payment_method === "cash" && "현금"}
-                    {transaction.payment_method === "transfer" && "이체"}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency } from "@/lib/utils";
 import { TransactionCategory } from "@/types/transaction";
 import { Edit2, Check, X } from "lucide-react";
+import { useTransactionsStore } from "@/lib/store/transactions-store";
+import { useToast } from "@/components/ui/toast";
 
 const CATEGORY_LABELS: Record<TransactionCategory, string> = {
   food: "식비",
@@ -27,24 +29,75 @@ interface BudgetItem {
   spent: number;
 }
 
-const MOCK_BUDGETS: BudgetItem[] = [
-  { category: "food", budget: 300000, spent: 280000 },
-  { category: "transport", budget: 100000, spent: 120000 },
-  { category: "shopping", budget: 150000, spent: 150000 },
-  { category: "entertainment", budget: 100000, spent: 80000 },
-  { category: "education", budget: 50000, spent: 0 },
-  { category: "health", budget: 30000, spent: 0 },
-  { category: "utilities", budget: 0, spent: 0 },
-  { category: "other", budget: 20000, spent: 20000 },
-];
+// 초기 예산 설정 (로컬 스토리지에서 불러오거나 기본값 사용)
+const getInitialBudgets = (): Record<TransactionCategory, number> => {
+  if (typeof window === "undefined") return DEFAULT_BUDGETS;
+  
+  const saved = localStorage.getItem("category-budgets");
+  if (saved) {
+    try {
+      return JSON.parse(saved);
+    } catch {
+      return DEFAULT_BUDGETS;
+    }
+  }
+  return DEFAULT_BUDGETS;
+};
+
+const DEFAULT_BUDGETS: Record<TransactionCategory, number> = {
+  food: 300000,
+  transport: 100000,
+  shopping: 150000,
+  entertainment: 100000,
+  education: 50000,
+  health: 30000,
+  utilities: 50000,
+  other: 20000,
+};
 
 export default function BudgetPage() {
-  const [budgets, setBudgets] = useState<BudgetItem[]>(MOCK_BUDGETS);
+  const { transactions } = useTransactionsStore();
+  const { addToast } = useToast();
+  
+  const [categoryBudgets, setCategoryBudgets] = useState<Record<TransactionCategory, number>>(getInitialBudgets());
   const [editingId, setEditingId] = useState<TransactionCategory | null>(null);
   const [tempValue, setTempValue] = useState("");
 
-  const totalBudget = budgets.reduce((sum, item) => sum + item.budget, 0);
-  const totalSpent = budgets.reduce((sum, item) => sum + item.spent, 0);
+  // 카테고리별 실제 지출 계산 (현재 월)
+  const categorySpending = useMemo(() => {
+    const spending: Record<TransactionCategory, number> = {
+      food: 0,
+      transport: 0,
+      shopping: 0,
+      entertainment: 0,
+      education: 0,
+      health: 0,
+      utilities: 0,
+      other: 0,
+    };
+
+    const currentMonth = new Date().toISOString().slice(0, 7);
+
+    transactions.forEach((t) => {
+      if (t.date.startsWith(currentMonth)) {
+        spending[t.category] += t.amount;
+      }
+    });
+
+    return spending;
+  }, [transactions]);
+
+  // BudgetItem 배열 생성
+  const budgets: BudgetItem[] = useMemo(() => {
+    return Object.entries(CATEGORY_LABELS).map(([category]) => ({
+      category: category as TransactionCategory,
+      budget: categoryBudgets[category as TransactionCategory],
+      spent: categorySpending[category as TransactionCategory],
+    }));
+  }, [categoryBudgets, categorySpending]);
+
+  const totalBudget = useMemo(() => budgets.reduce((sum, item) => sum + item.budget, 0), [budgets]);
+  const totalSpent = useMemo(() => budgets.reduce((sum, item) => sum + item.spent, 0), [budgets]);
   const totalRemaining = totalBudget - totalSpent;
 
   const handleEdit = (category: TransactionCategory, currentBudget: number) => {
@@ -54,13 +107,27 @@ export default function BudgetPage() {
 
   const handleSave = (category: TransactionCategory) => {
     const newBudget = parseInt(tempValue) || 0;
-    setBudgets(
-      budgets.map((item) =>
-        item.category === category ? { ...item, budget: newBudget } : item
-      )
-    );
+    
+    const updatedBudgets = {
+      ...categoryBudgets,
+      [category]: newBudget,
+    };
+    
+    setCategoryBudgets(updatedBudgets);
+    
+    // 로컬 스토리지에 저장
+    if (typeof window !== "undefined") {
+      localStorage.setItem("category-budgets", JSON.stringify(updatedBudgets));
+    }
+    
     setEditingId(null);
     setTempValue("");
+    
+    addToast({
+      title: "예산 설정 완료",
+      description: `${CATEGORY_LABELS[category]} 예산이 ${formatCurrency(newBudget)}로 설정되었습니다.`,
+      variant: "success",
+    });
   };
 
   const handleCancel = () => {
@@ -77,138 +144,144 @@ export default function BudgetPage() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">예산 관리</h1>
-        <p className="text-slate-600 mt-1">
+      <div className="pt-2">
+        <h1 className="text-2xl font-bold text-slate-900">예산 관리</h1>
+        <p className="text-sm text-slate-600 mt-1">
           카테고리별 예산을 설정하고 지출을 관리하세요
         </p>
       </div>
 
       {/* Overall Summary */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600">총 예산</p>
-            <p className="text-3xl font-bold text-slate-900 mt-2">
+      <div className="grid gap-3 grid-cols-3">
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <p className="text-xs text-slate-600 mb-1">총 예산</p>
+            <p className="text-xl font-bold text-slate-900">
               {formatCurrency(totalBudget)}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600">총 지출</p>
-            <p className="text-3xl font-bold text-violet-600 mt-2">
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <p className="text-xs text-slate-600 mb-1">총 지출</p>
+            <p className="text-xl font-bold text-violet-600">
               {formatCurrency(totalSpent)}
             </p>
-            <p className="text-sm text-slate-500 mt-2">
+            <p className="text-[10px] text-slate-500 mt-1">
               {totalBudget > 0
                 ? `${((totalSpent / totalBudget) * 100).toFixed(0)}% 사용`
-                : "예산 미설정"}
+                : "미설정"}
             </p>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <p className="text-sm font-medium text-slate-600">남은 예산</p>
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <p className="text-xs text-slate-600 mb-1">남은 예산</p>
             <p
-              className={`text-3xl font-bold mt-2 ${
+              className={`text-xl font-bold ${
                 totalRemaining < 0 ? "text-red-600" : "text-emerald-600"
               }`}
             >
               {formatCurrency(Math.abs(totalRemaining))}
             </p>
             {totalRemaining < 0 && (
-              <p className="text-sm text-red-500 mt-2">예산 초과</p>
+              <p className="text-[10px] text-red-500 mt-1">초과</p>
             )}
           </CardContent>
         </Card>
       </div>
 
       {/* Category Budgets */}
-      <Card>
-        <CardHeader>
-          <CardTitle>카테고리별 예산</CardTitle>
+      <Card className="shadow-sm">
+        <CardHeader className="p-4">
+          <CardTitle className="text-lg">카테고리별 예산</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-6">
+        <CardContent className="p-4 pt-0">
+          <div className="space-y-5">
             {budgets.map((item) => {
               const percentage =
                 item.budget > 0 ? (item.spent / item.budget) * 100 : 0;
               const status = getBudgetStatus(item.spent, item.budget);
               const isEditing = editingId === item.category;
 
+              const categoryIcons: Record<TransactionCategory, string> = {
+                food: "🍽️",
+                transport: "🚗",
+                shopping: "🛍️",
+                entertainment: "🎬",
+                education: "📚",
+                health: "💊",
+                utilities: "💡",
+                other: "📦",
+              };
+
               return (
                 <div key={item.category} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <span className="text-xl">
-                        {item.category === "food" && "🍽️"}
-                        {item.category === "transport" && "🚗"}
-                        {item.category === "shopping" && "🛍️"}
-                        {item.category === "entertainment" && "🎬"}
-                        {item.category === "education" && "📚"}
-                        {item.category === "health" && "💊"}
-                        {item.category === "utilities" && "💡"}
-                        {item.category === "other" && "📦"}
-                      </span>
-                      <div>
-                        <p className="font-medium text-slate-900">
-                          {CATEGORY_LABELS[item.category]}
-                        </p>
-                        <p className="text-sm text-slate-500">
-                          {formatCurrency(item.spent)} /{" "}
-                          {formatCurrency(item.budget)}
+                    <div className="flex items-center gap-3 flex-1">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <span className="text-lg">
+                          {categoryIcons[item.category]}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                          <p className="font-semibold text-slate-900 text-sm">
+                            {CATEGORY_LABELS[item.category]}
+                          </p>
+                          {status.severity === "danger" && (
+                            <Badge variant="destructive" className="text-[9px] px-1.5 py-0">초과</Badge>
+                          )}
+                          {status.severity === "warning" && (
+                            <Badge variant="warning" className="text-[9px] px-1.5 py-0">주의</Badge>
+                          )}
+                        </div>
+                        <p className="text-xs text-slate-500">
+                          {formatCurrency(item.spent)} / {formatCurrency(item.budget)}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex items-center gap-2">
-                      {status.severity === "danger" && (
-                        <Badge variant="destructive">초과</Badge>
-                      )}
-                      {status.severity === "warning" && (
-                        <Badge variant="warning">주의</Badge>
-                      )}
-
-                      {isEditing ? (
-                        <div className="flex items-center gap-2">
-                          <Input
-                            type="number"
-                            value={tempValue}
-                            onChange={(e) => setTempValue(e.target.value)}
-                            className="w-32"
-                            placeholder="예산 입력"
-                            autoFocus
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={() => handleSave(item.category)}
-                          >
-                            <Check className="h-4 w-4 text-emerald-600" />
-                          </Button>
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            onClick={handleCancel}
-                          >
-                            <X className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      ) : (
+                    {isEditing ? (
+                      <div className="flex items-center gap-1 ml-2">
+                        <Input
+                          type="number"
+                          value={tempValue}
+                          onChange={(e) => setTempValue(e.target.value)}
+                          className="w-24 h-9 text-sm"
+                          placeholder="예산"
+                          autoFocus
+                        />
                         <Button
-                          size="icon"
-                          variant="ghost"
-                          onClick={() => handleEdit(item.category, item.budget)}
+                          size="sm"
+                          className="h-9 w-9 p-0 bg-emerald-600 hover:bg-emerald-700"
+                          onClick={() => handleSave(item.category)}
                         >
-                          <Edit2 className="h-4 w-4" />
+                          <Check className="h-4 w-4" />
                         </Button>
-                      )}
-                    </div>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="h-9 w-9 p-0"
+                          onClick={handleCancel}
+                        >
+                          <X className="h-4 w-4 text-red-600" />
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="h-9 w-9 p-0 ml-2"
+                        onClick={() => handleEdit(item.category, item.budget)}
+                      >
+                        <Edit2 className="h-3.5 w-3.5 text-violet-600" />
+                      </Button>
+                    )}
                   </div>
 
                   <div className="space-y-1">
@@ -216,7 +289,7 @@ export default function BudgetPage() {
                       value={Math.min(percentage, 100)}
                       className="h-2"
                     />
-                    <p className="text-xs text-slate-500 text-right">
+                    <p className="text-[10px] text-slate-500 text-right">
                       {percentage.toFixed(0)}% 사용
                     </p>
                   </div>
@@ -228,15 +301,15 @@ export default function BudgetPage() {
       </Card>
 
       {/* Tips */}
-      <Card className="bg-violet-50 border-violet-200">
-        <CardContent className="p-6">
-          <h3 className="font-semibold text-violet-900 mb-2">
+      <Card className="bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200 shadow-sm">
+        <CardContent className="p-4">
+          <h3 className="font-semibold text-violet-900 mb-2 text-sm">
             💡 예산 설정 팁
           </h3>
-          <ul className="space-y-1 text-sm text-violet-800">
-            <li>• 월 수입의 50-30-20 법칙: 생활비 50%, 여가 30%, 저축 20%</li>
-            <li>• 식비는 월 수입의 20-25%가 적정선입니다</li>
-            <li>• 예산의 80%에 도달하면 지출을 줄이기 시작하세요</li>
+          <ul className="space-y-1 text-xs text-violet-800 leading-relaxed">
+            <li>• 50-30-20 법칙: 생활비 50%, 여가 30%, 저축 20%</li>
+            <li>• 식비는 월 수입의 20-25%가 적정</li>
+            <li>• 예산의 80%에 도달하면 지출 줄이기</li>
           </ul>
         </CardContent>
       </Card>

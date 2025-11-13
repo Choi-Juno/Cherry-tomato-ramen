@@ -101,91 +101,87 @@ export default function InsightsPage() {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5">
       {/* Page Header */}
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">AI 인사이트</h1>
-        <p className="text-slate-600 mt-1">
+      <div className="pt-2">
+        <h1 className="text-2xl font-bold text-slate-900">AI 인사이트</h1>
+        <p className="text-sm text-slate-600 mt-1">
           AI가 분석한 당신의 소비 패턴과 개선 방안
         </p>
       </div>
 
       {/* Summary Cards */}
-      <div className="grid gap-4 md:grid-cols-3">
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-violet-100 p-3">
-                <Lightbulb className="h-6 w-6 text-violet-600" />
+      <div className="grid gap-3 grid-cols-3">
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="rounded-full bg-violet-100 p-2.5 mb-2">
+                <Lightbulb className="h-5 w-5 text-violet-600" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600">
-                  총 인사이트
-                </p>
-                <p className="text-2xl font-bold text-slate-900 mt-1">
-                  {MOCK_INSIGHTS.length}개
-                </p>
-              </div>
+              <p className="text-[10px] font-medium text-slate-600 mb-1">
+                인사이트
+              </p>
+              <p className="text-lg font-bold text-slate-900">
+                {MOCK_INSIGHTS.length}개
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-emerald-100 p-3">
-                <TrendingUp className="h-6 w-6 text-emerald-600" />
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="rounded-full bg-emerald-100 p-2.5 mb-2">
+                <TrendingUp className="h-5 w-5 text-emerald-600" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600">
-                  절약 가능 금액
-                </p>
-                <p className="text-2xl font-bold text-emerald-600 mt-1">
-                  {(totalPotentialSavings / 10000).toFixed(0)}만원
-                </p>
-              </div>
+              <p className="text-[10px] font-medium text-slate-600 mb-1">
+                절약 가능
+              </p>
+              <p className="text-lg font-bold text-emerald-600">
+                {(totalPotentialSavings / 10000).toFixed(0)}만원
+              </p>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-6">
-            <div className="flex items-center gap-3">
-              <div className="rounded-full bg-amber-100 p-3">
-                <AlertTriangle className="h-6 w-6 text-amber-600" />
+        <Card className="shadow-sm">
+          <CardContent className="p-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="rounded-full bg-amber-100 p-2.5 mb-2">
+                <AlertTriangle className="h-5 w-5 text-amber-600" />
               </div>
-              <div>
-                <p className="text-sm font-medium text-slate-600">주의 항목</p>
-                <p className="text-2xl font-bold text-amber-600 mt-1">
-                  {warningInsights.length}개
-                </p>
-              </div>
+              <p className="text-[10px] font-medium text-slate-600 mb-1">
+                주의 항목
+              </p>
+              <p className="text-lg font-bold text-amber-600">
+                {warningInsights.length}개
+              </p>
             </div>
           </CardContent>
         </Card>
       </div>
 
       {/* Insights Tabs */}
-      <Tabs defaultValue="all" className="space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
+      <Tabs defaultValue="all" className="space-y-4">
+        <TabsList className="grid w-full grid-cols-3 h-11">
           {TABS_DATA.map((tab) => {
             const Icon = tab.icon;
             return (
-              <TabsTrigger key={tab.value} value={tab.value} className="gap-2">
-                <Icon className="h-4 w-4" />
+              <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5 text-sm">
+                <Icon className="h-3.5 w-3.5" />
                 {tab.label}
               </TabsTrigger>
             );
           })}
         </TabsList>
 
-        <TabsContent value="all" className="space-y-4">
+        <TabsContent value="all" className="space-y-3 mt-4">
           {MOCK_INSIGHTS.map((insight) => (
             <AIInsightCard key={insight.id} insight={insight} />
           ))}
         </TabsContent>
 
-        <TabsContent value="savings" className="space-y-4">
+        <TabsContent value="savings" className="space-y-3 mt-4">
           {savingsInsights.length > 0 ? (
             savingsInsights.map((insight) => (
               <AIInsightCard key={insight.id} insight={insight} />
@@ -193,7 +189,8 @@ export default function InsightsPage() {
           ) : (
             <Card>
               <CardContent className="p-12 text-center">
-                <p className="text-slate-500">
+                <div className="text-4xl mb-3">💰</div>
+                <p className="text-sm text-slate-600">
                   현재 추천할 절약 기회가 없습니다
                 </p>
               </CardContent>
@@ -201,7 +198,7 @@ export default function InsightsPage() {
           )}
         </TabsContent>
 
-        <TabsContent value="warnings" className="space-y-4">
+        <TabsContent value="warnings" className="space-y-3 mt-4">
           {warningInsights.length > 0 ? (
             warningInsights.map((insight) => (
               <AIInsightCard key={insight.id} insight={insight} />
@@ -209,7 +206,8 @@ export default function InsightsPage() {
           ) : (
             <Card>
               <CardContent className="p-12 text-center">
-                <p className="text-slate-500">
+                <div className="text-4xl mb-3">✨</div>
+                <p className="text-sm text-slate-600">
                   현재 주의가 필요한 항목이 없습니다 👍
                 </p>
               </CardContent>

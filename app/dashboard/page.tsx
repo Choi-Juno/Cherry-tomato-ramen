@@ -79,7 +79,7 @@ export default function DashboardPage() {
     // 카테고리별 지출 계산
     const categoryData = useMemo(() => {
         const categoryTotals: Record<string, number> = {};
-        
+
         transactions.forEach((t) => {
             if (!categoryTotals[t.category]) {
                 categoryTotals[t.category] = 0;
@@ -98,13 +98,13 @@ export default function DashboardPage() {
     const weeklyTrend = useMemo(() => {
         const weeks: Record<string, number> = {};
         const now = new Date();
-        
+
         transactions.forEach((t) => {
             const transDate = new Date(t.date);
             const diffTime = now.getTime() - transDate.getTime();
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
             const weekNumber = Math.floor(diffDays / 7);
-            
+
             if (weekNumber < 5) {
                 const weekKey = `week${weekNumber}`;
                 if (!weeks[weekKey]) {
@@ -119,12 +119,14 @@ export default function DashboardPage() {
         for (let i = 4; i >= 0; i--) {
             const weekKey = `week${i}`;
             trendData.push({
-                date: new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+                date: new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000)
+                    .toISOString()
+                    .split("T")[0],
                 amount: weeks[weekKey] || 0,
-                label: i === 0 ? '이번 주' : `${i}주 전`,
+                label: i === 0 ? "이번 주" : `${i}주 전`,
             });
         }
-        
+
         return trendData;
     }, [transactions]);
 
@@ -166,7 +168,7 @@ export default function DashboardPage() {
             </div>
 
             {/* Spending Summary Cards - 실시간 데이터 */}
-            <SpendingSummary 
+            <SpendingSummary
                 totalSpent={totalSpent}
                 budgetRemaining={budgetRemaining}
                 monthlyBudget={monthlyBudget}
