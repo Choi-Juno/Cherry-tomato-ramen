@@ -1,7 +1,8 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { Transaction, CreateTransactionInput } from "@/types/transaction";
+import { createClient } from "@/lib/supabase/client";
 
 interface TransactionsContextType {
   transactions: Transaction[];
@@ -9,135 +10,150 @@ interface TransactionsContextType {
   updateTransaction: (id: string, data: Partial<Transaction>) => Promise<void>;
   deleteTransaction: (id: string) => Promise<void>;
   isLoading: boolean;
+  refreshTransactions: () => Promise<void>;
 }
 
 const TransactionsContext = createContext<TransactionsContextType | undefined>(
   undefined
 );
 
-// Mock 초기 데이터 - 최근 1개월
-const INITIAL_TRANSACTIONS: Transaction[] = [
-  {
-    id: "1",
-    user_id: "mock-user",
-    amount: 5500,
-    description: "스타벅스",
-    category: "food",
-    payment_method: "card",
-    merchant: "스타벅스",
-    date: new Date().toISOString().split("T")[0],
-    created_at: new Date().toISOString(),
-    updated_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    user_id: "mock-user",
-    amount: 12000,
-    description: "택시",
-    category: "transport",
-    payment_method: "card",
-    merchant: "카카오T",
-    date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    updated_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "3",
-    user_id: "mock-user",
-    amount: 9000,
-    description: "점심 식사",
-    category: "food",
-    payment_method: "card",
-    merchant: "한식당",
-    date: new Date(Date.now() - 86400000).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 86400000).toISOString(),
-    updated_at: new Date(Date.now() - 86400000).toISOString(),
-  },
-  {
-    id: "4",
-    user_id: "mock-user",
-    amount: 15000,
-    description: "영화 관람",
-    category: "entertainment",
-    payment_method: "card",
-    merchant: "CGV",
-    date: new Date(Date.now() - 172800000).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 172800000).toISOString(),
-    updated_at: new Date(Date.now() - 172800000).toISOString(),
-  },
-  {
-    id: "5",
-    user_id: "mock-user",
-    amount: 8500,
-    description: "편의점",
-    category: "food",
-    payment_method: "cash",
-    merchant: "GS25",
-    date: new Date(Date.now() - 259200000).toISOString().split("T")[0],
-    created_at: new Date(Date.now() - 259200000).toISOString(),
-    updated_at: new Date(Date.now() - 259200000).toISOString(),
-  },
-];
+// Mock User ID (인증 구현 전까지 사용)
+// scripts/seed-test-user.ts에서 생성된 실제 사용자 ID
+const MOCK_USER_ID = "8140d257-f25a-48d0-a38a-47d90850689a";
 
 export function TransactionsProvider({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [transactions, setTransactions] =
-    useState<Transaction[]>(INITIAL_TRANSACTIONS);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const supabase = createClient();
+
+  // 초기 데이터 로드
+  const refreshTransactions = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      
+      const { data, error } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("user_id", MOCK_USER_ID)
+        .order("date", { ascending: false })
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Failed to fetch transactions:", error);
+        throw error;
+      }
+
+      setTransactions(data || []);
+    } catch (error) {
+      console.error("Error loading transactions:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [supabase]);
+
+  // 컴포넌트 마운트 시 데이터 로드
+  useEffect(() => {
+    refreshTransactions();
+  }, [refreshTransactions]);
 
   const addTransaction = useCallback(
     async (input: CreateTransactionInput) => {
-      setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+        const newTransaction = {
+          user_id: MOCK_USER_ID,
+          ...input,
+        };
 
-      const newTransaction: Transaction = {
-        id: `mock-${Date.now()}`,
-        user_id: "mock-user",
-        ...input,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
-      };
+        const { data, error } = await supabase
+          .from("transactions")
+          .insert([newTransaction])
+          .select()
+          .single();
 
-      setTransactions((prev) => [newTransaction, ...prev]);
-      setIsLoading(false);
+        if (error) {
+          console.error("Failed to add transaction:", error);
+          throw error;
+        }
+
+        // 로컬 상태 업데이트
+        setTransactions((prev) => [data, ...prev]);
+      } catch (error) {
+        console.error("Error adding transaction:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
     },
-    []
+    [supabase]
   );
 
   const updateTransaction = useCallback(
     async (id: string, data: Partial<Transaction>) => {
-      setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+        const { error } = await supabase
+          .from("transactions")
+          .update(data)
+          .eq("id", id)
+          .eq("user_id", MOCK_USER_ID);
 
-      setTransactions((prev) =>
-        prev.map((t) =>
-          t.id === id
-            ? { ...t, ...data, updated_at: new Date().toISOString() }
-            : t
-        )
-      );
+        if (error) {
+          console.error("Failed to update transaction:", error);
+          throw error;
+        }
 
-      setIsLoading(false);
+        // 로컬 상태 업데이트
+        setTransactions((prev) =>
+          prev.map((t) =>
+            t.id === id
+              ? { ...t, ...data, updated_at: new Date().toISOString() }
+              : t
+          )
+        );
+      } catch (error) {
+        console.error("Error updating transaction:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
     },
-    []
+    [supabase]
   );
 
-  const deleteTransaction = useCallback(async (id: string) => {
-    setIsLoading(true);
+  const deleteTransaction = useCallback(
+    async (id: string) => {
+      try {
+        setIsLoading(true);
 
-    // Simulate API delay
-    await new Promise((resolve) => setTimeout(resolve, 500));
+        const { error } = await supabase
+          .from("transactions")
+          .delete()
+          .eq("id", id)
+          .eq("user_id", MOCK_USER_ID);
 
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
-    setIsLoading(false);
-  }, []);
+        if (error) {
+          console.error("Failed to delete transaction:", error);
+          throw error;
+        }
+
+        // 로컬 상태 업데이트
+        setTransactions((prev) => prev.filter((t) => t.id !== id));
+      } catch (error) {
+        console.error("Error deleting transaction:", error);
+        throw error;
+      } finally {
+        setIsLoading(false);
+      }
+    },
+    [supabase]
+  );
 
   return (
     <TransactionsContext.Provider
@@ -147,6 +163,7 @@ export function TransactionsProvider({
         updateTransaction,
         deleteTransaction,
         isLoading,
+        refreshTransactions,
       }}
     >
       {children}
