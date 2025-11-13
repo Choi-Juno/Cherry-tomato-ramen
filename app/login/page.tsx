@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -122,6 +123,18 @@ export default function LoginPage() {
               <p>📧 이메일: <code className="bg-white px-2 py-0.5 rounded">test@example.com</code></p>
               <p>🔑 비밀번호: <code className="bg-white px-2 py-0.5 rounded">test123456</code></p>
             </div>
+          </div>
+
+          <div className="mt-6 text-center">
+            <p className="text-sm text-slate-600">
+              계정이 없으신가요?{" "}
+              <Link
+                href="/signup"
+                className="font-semibold text-violet-600 hover:text-violet-700"
+              >
+                회원가입
+              </Link>
+            </p>
           </div>
         </CardContent>
       </Card>
