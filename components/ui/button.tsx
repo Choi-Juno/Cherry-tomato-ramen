@@ -10,9 +10,9 @@ const buttonVariants = cva(
       variant: {
         default: "bg-violet-600 text-white hover:bg-violet-700 focus-visible:ring-violet-600",
         destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600",
-        outline: "border border-slate-300 bg-white hover:bg-slate-50 focus-visible:ring-slate-400",
+        outline: "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50 focus-visible:ring-slate-400",
         secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 focus-visible:ring-slate-400",
-        ghost: "hover:bg-slate-100 focus-visible:ring-slate-400",
+        ghost: "text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400",
         link: "text-violet-600 underline-offset-4 hover:underline",
       },
       size: {
