@@ -7,6 +7,7 @@ import { Home, Receipt, Sparkles, Target, User, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
+import { ThemeToggle } from "@/components/shared/ThemeToggle";
 
 const NAV_ITEMS = [
   {
@@ -70,17 +71,21 @@ export function Navigation() {
   return (
     <>
       {/* Mobile Top Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm">
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700">
         <div className="flex h-14 items-center justify-between px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <span className="text-xl">🍅</span>
-            <span className="text-lg font-bold text-slate-900">
+            <span className="text-lg font-bold text-slate-900 dark:text-slate-100">
               소비 코치
             </span>
           </Link>
           
-          {/* Profile Button with Menu */}
-          <div className="relative">
+          {/* Theme Toggle and Profile */}
+          <div className="flex items-center gap-2">
+            <ThemeToggle />
+            
+            {/* Profile Button with Menu */}
+            <div className="relative">
             <button
               onClick={() => setShowProfileMenu(!showProfileMenu)}
               className="flex h-9 w-9 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-purple-600 text-white shadow-md active:scale-95 transition-transform"
@@ -98,10 +103,10 @@ export function Navigation() {
                 />
                 
                 {/* Menu */}
-                <div className="absolute right-0 top-12 z-50 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden">
-                  <div className="p-4 border-b border-slate-200 bg-gradient-to-br from-violet-50 to-purple-50">
-                    <p className="text-xs text-slate-600 mb-1">로그인 계정</p>
-                    <p className="text-sm font-semibold text-slate-900 truncate">
+                <div className="absolute right-0 top-12 z-50 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden dark:bg-slate-800 dark:border-slate-700">
+                  <div className="p-4 border-b border-slate-200 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30 dark:border-slate-700">
+                    <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">로그인 계정</p>
+                    <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                       {userEmail || "사용자"}
                     </p>
                   </div>
@@ -124,7 +129,7 @@ export function Navigation() {
       </header>
 
       {/* Mobile Bottom Navigation (Fixed) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg pb-safe dark:bg-slate-800 dark:border-slate-700">
         <div className="flex items-center justify-around">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;
@@ -135,7 +140,7 @@ export function Navigation() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-1 py-2 px-3 min-h-[68px] flex-1 active:bg-slate-50 transition-all relative",
+                  "flex flex-col items-center justify-center gap-1 py-2 px-3 min-h-[68px] flex-1 active:bg-slate-50 dark:active:bg-slate-700 transition-all relative",
                   isActive && "text-violet-600"
                 )}
               >
@@ -145,12 +150,12 @@ export function Navigation() {
                 <Icon 
                   className={cn(
                     "h-6 w-6 transition-transform",
-                    isActive ? "stroke-[2.5] scale-110" : "stroke-[2] text-slate-500"
+                    isActive ? "stroke-[2.5] scale-110" : "stroke-[2] text-slate-500 dark:text-slate-400"
                   )} 
                 />
                 <span className={cn(
                   "text-[10px] font-medium transition-all",
-                  isActive ? "font-bold text-violet-600" : "text-slate-600"
+                  isActive ? "font-bold text-violet-600" : "text-slate-600 dark:text-slate-400"
                 )}>
                   {item.label}
                 </span>
