@@ -60,12 +60,12 @@ export function SpendingChart({
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 12 }}
-                stroke="#64748b"
+                tick={{ fontSize: 12, fill: "#1e293b" }}
+                stroke="#94a3b8"
               />
               <YAxis
-                tick={{ fontSize: 12 }}
-                stroke="#64748b"
+                tick={{ fontSize: 12, fill: "#1e293b" }}
+                stroke="#94a3b8"
                 tickFormatter={(value) => `${Math.floor(value / 1000)}K`}
               />
               <Tooltip content={<CustomTooltip />} />
@@ -83,12 +83,12 @@ export function SpendingChart({
               <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 12 }}
-                stroke="#64748b"
+                tick={{ fontSize: 12, fill: "#1e293b" }}
+                stroke="#94a3b8"
               />
               <YAxis
-                tick={{ fontSize: 12 }}
-                stroke="#64748b"
+                tick={{ fontSize: 12, fill: "#1e293b" }}
+                stroke="#94a3b8"
                 tickFormatter={(value) => `${Math.floor(value / 1000)}K`}
               />
               <Tooltip content={<CustomTooltip />} />

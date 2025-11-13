@@ -112,7 +112,7 @@ export function CategoryAnalysis({
               height={36}
               formatter={(value, entry) => {
                 const categoryData = entry.payload as unknown as CategoryData;
-                return <span className="text-sm">{categoryData.label}</span>;
+                return <span className="text-sm text-slate-900 font-medium">{categoryData.label}</span>;
               }}
             />
           </PieChart>
