@@ -33,7 +33,7 @@ export default function SignupPage() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // 유효성 검사
+    // 클라이언트 측 유효성 검사
     if (formData.password !== formData.confirmPassword) {
       addToast({
         title: "비밀번호 불일치",
@@ -64,59 +64,53 @@ export default function SignupPage() {
     try {
       setIsLoading(true);
 
-      // 1. Supabase Auth로 사용자 생성
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: formData.email,
-        password: formData.password,
-        options: {
-          data: {
-            full_name: formData.name,
-          },
+      // API Route를 통해 회원가입 처리
+      const response = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
         },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          name: formData.name,
+        }),
       });
 
-      if (authError) {
+      const data = await response.json();
+
+      if (!response.ok) {
         addToast({
           title: "회원가입 실패",
-          description: authError.message,
+          description: data.error || "알 수 없는 오류가 발생했습니다.",
           variant: "error",
         });
         return;
       }
 
-      if (!authData.user) {
+      // 회원가입 성공 후 자동 로그인
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: formData.email,
+        password: formData.password,
+      });
+
+      if (signInError) {
         addToast({
-          title: "회원가입 실패",
-          description: "사용자 생성에 실패했습니다.",
+          title: "로그인 실패",
+          description: "회원가입은 성공했지만 자동 로그인에 실패했습니다. 로그인 페이지에서 다시 시도해주세요.",
           variant: "error",
         });
+        router.push("/login");
         return;
-      }
-
-      // 2. public.users 테이블에 프로필 생성
-      const { error: profileError } = await supabase
-        .from("users")
-        .insert([
-          {
-            id: authData.user.id,
-            email: authData.user.email!,
-            full_name: formData.name,
-          },
-        ]);
-
-      if (profileError) {
-        console.error("Profile creation error:", profileError);
-        // 프로필 생성 실패해도 계속 진행 (이미 auth.users에는 생성됨)
       }
 
       addToast({
         title: "회원가입 성공! 🎉",
-        description: "환영합니다! 로그인 중...",
+        description: `환영합니다, ${formData.name}님!`,
         variant: "success",
       });
       
-      // 로그인 성공 시 Dashboard로 이동
-      // Supabase signUp은 자동으로 세션을 생성함
+      // Dashboard로 이동
       router.push("/dashboard");
       router.refresh();
       
