@@ -1,85 +1,14 @@
+"use client";
+
 import { AIInsightCard } from "@/components/insights/AIInsightCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AIInsight } from "@/types/insight";
 import { Lightbulb, TrendingUp, AlertTriangle } from "lucide-react";
-
-// Mock data
-const MOCK_INSIGHTS: AIInsight[] = [
-  {
-    id: "1",
-    user_id: "user1",
-    type: "overspending",
-    severity: "warning",
-    title: "식비 지출이 증가하고 있어요",
-    description:
-      "지난달 대비 식비가 15% 증가했습니다. 배달 음식과 카페 이용이 주요 원인입니다.",
-    suggested_action:
-      "주 2회 배달 음식을 줄이면 월 5만원을 절약할 수 있어요",
-    potential_savings: 50000,
-    category: "food",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "2",
-    user_id: "user1",
-    type: "savings_opportunity",
-    severity: "info",
-    title: "교통비 절약 기회",
-    description:
-      "최근 택시 이용이 많았습니다. 대중교통을 이용하면 교통비를 절감할 수 있습니다.",
-    suggested_action: "주 3회 대중교통 이용으로 월 3만원 절약 가능",
-    potential_savings: 30000,
-    category: "transport",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "3",
-    user_id: "user1",
-    type: "trend_decrease",
-    severity: "info",
-    title: "쇼핑 지출이 감소했어요! 👏",
-    description: "지난달 대비 쇼핑 지출이 20% 감소했습니다. 잘하고 계세요!",
-    category: "shopping",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "4",
-    user_id: "user1",
-    type: "category_warning",
-    severity: "warning",
-    title: "문화/여가 예산 초과 위험",
-    description:
-      "이번 달 문화/여가 지출이 예산의 85%에 도달했습니다. 남은 기간 동안 주의가 필요합니다.",
-    suggested_action: "이번 주말은 무료 문화 시설을 이용해보는 건 어떨까요?",
-    category: "entertainment",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "5",
-    user_id: "user1",
-    type: "spending_persona",
-    severity: "info",
-    title: "당신의 소비 패턴: 균형잡힌 소비자 🎯",
-    description:
-      "다양한 카테고리에 고르게 지출하고 있으며, 충동 구매가 적은 편입니다. 전체 사용자 중 상위 30%의 건강한 소비 패턴을 보이고 있어요!",
-    created_at: new Date().toISOString(),
-  },
-  {
-    id: "6",
-    user_id: "user1",
-    type: "trend_increase",
-    severity: "critical",
-    title: "배달 음식 지출 급증",
-    description:
-      "최근 2주간 배달 음식 주문이 이전 대비 50% 증가했습니다. 주요 원인은 야식 주문입니다.",
-    suggested_action:
-      "집에서 간단한 요리를 준비하거나, 야식 대신 건강한 간식을 준비해보세요",
-    potential_savings: 40000,
-    category: "food",
-    created_at: new Date().toISOString(),
-  },
-];
+import { useState, useEffect, useMemo } from "react";
+import { mlApiClient } from "@/lib/ml/client";
+import { createClient } from "@/lib/supabase/client";
+import { useTransactionsStore } from "@/lib/store/transactions-store";
 
 const TABS_DATA = [
   { value: "all", label: "전체", icon: Lightbulb },
@@ -88,16 +17,101 @@ const TABS_DATA = [
 ];
 
 export default function InsightsPage() {
-  const savingsInsights = MOCK_INSIGHTS.filter(
-    (i) => i.type === "savings_opportunity" || i.potential_savings
-  );
-  const warningInsights = MOCK_INSIGHTS.filter(
-    (i) => i.severity === "warning" || i.severity === "critical"
+  const { transactions } = useTransactionsStore();
+  const supabase = createClient();
+
+  // AI Insights 상태
+  const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
+  const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+  const [insightsError, setInsightsError] = useState<string | null>(null);
+
+  // ML API에서 AI 인사이트 가져오기
+  useEffect(() => {
+    const fetchInsights = async () => {
+      // 거래 내역이 없으면 인사이트를 가져오지 않음
+      if (transactions.length === 0) {
+        setAiInsights([]);
+        return;
+      }
+
+      setIsLoadingInsights(true);
+      setInsightsError(null);
+
+      try {
+        // 현재 사용자 ID 가져오기
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) {
+          throw new Error("User not authenticated");
+        }
+
+        // 예산 데이터 준비 (카테고리별)
+        const currentMonthBudget = {
+          food: 300000,
+          transport: 100000,
+          shopping: 150000,
+          entertainment: 100000,
+          education: 50000,
+          health: 30000,
+          utilities: 50000,
+          other: 20000,
+        };
+
+        // ML API 호출
+        const response = await mlApiClient.generateInsights({
+          user_id: user.id,
+          transactions: transactions.map((t) => ({
+            date: t.date,
+            amount: t.amount,
+            category: t.category,
+            description: t.description,
+          })),
+          current_month_budget: currentMonthBudget,
+        });
+
+        // 인사이트 설정 (ML API 응답을 AIInsight 타입으로 변환)
+        const insights: AIInsight[] = (response.insights || []).map((insight, index) => ({
+          ...insight,
+          id: `${user.id}-${Date.now()}-${index}`,
+          user_id: user.id,
+          created_at: new Date().toISOString(),
+        }));
+        setAiInsights(insights);
+      } catch (error) {
+        console.error("Failed to fetch AI insights:", error);
+        setInsightsError("AI 인사이트를 불러올 수 없습니다. 잠시 후 다시 시도해주세요.");
+        setAiInsights([]);
+      } finally {
+        setIsLoadingInsights(false);
+      }
+    };
+
+    fetchInsights();
+  }, [transactions, supabase]);
+
+  // 필터링된 인사이트 계산
+  const savingsInsights = useMemo(
+    () =>
+      aiInsights.filter(
+        (i) => i.type === "savings_opportunity" || i.potential_savings
+      ),
+    [aiInsights]
   );
 
-  const totalPotentialSavings = MOCK_INSIGHTS.reduce(
-    (sum, insight) => sum + (insight.potential_savings || 0),
-    0
+  const warningInsights = useMemo(
+    () =>
+      aiInsights.filter(
+        (i) => i.severity === "warning" || i.severity === "critical"
+      ),
+    [aiInsights]
+  );
+
+  const totalPotentialSavings = useMemo(
+    () =>
+      aiInsights.reduce(
+        (sum, insight) => sum + (insight.potential_savings || 0),
+        0
+      ),
+    [aiInsights]
   );
 
   return (
@@ -122,7 +136,7 @@ export default function InsightsPage() {
                 인사이트
               </p>
               <p className="text-lg font-bold text-slate-900">
-                {MOCK_INSIGHTS.length}개
+                {isLoadingInsights ? "-" : `${aiInsights.length}개`}
               </p>
             </div>
           </CardContent>
@@ -138,7 +152,9 @@ export default function InsightsPage() {
                 절약 가능
               </p>
               <p className="text-lg font-bold text-emerald-600">
-                {(totalPotentialSavings / 10000).toFixed(0)}만원
+                {isLoadingInsights
+                  ? "-"
+                  : `${(totalPotentialSavings / 10000).toFixed(0)}만원`}
               </p>
             </div>
           </CardContent>
@@ -154,7 +170,7 @@ export default function InsightsPage() {
                 주의 항목
               </p>
               <p className="text-lg font-bold text-amber-600">
-                {warningInsights.length}개
+                {isLoadingInsights ? "-" : `${warningInsights.length}개`}
               </p>
             </div>
           </CardContent>
@@ -176,13 +192,51 @@ export default function InsightsPage() {
         </TabsList>
 
         <TabsContent value="all" className="space-y-3 mt-4">
-          {MOCK_INSIGHTS.map((insight) => (
-            <AIInsightCard key={insight.id} insight={insight} />
-          ))}
+          {isLoadingInsights ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="text-4xl mb-3">🤖</div>
+                <p className="text-sm text-slate-600">
+                  AI가 당신의 소비 패턴을 분석하고 있습니다...
+                </p>
+              </CardContent>
+            </Card>
+          ) : insightsError ? (
+            <Card className="border-red-200 bg-red-50">
+              <CardContent className="p-6 text-center">
+                <div className="text-3xl mb-2">⚠️</div>
+                <p className="text-sm text-red-700">{insightsError}</p>
+              </CardContent>
+            </Card>
+          ) : aiInsights.length === 0 ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="text-4xl mb-3">💡</div>
+                <p className="text-sm text-slate-600">
+                  {transactions.length === 0
+                    ? "지출 내역을 추가하면 AI가 인사이트를 제공합니다"
+                    : "현재 특별한 인사이트가 없습니다. 계속 현명한 소비를 하세요!"}
+                </p>
+              </CardContent>
+            </Card>
+          ) : (
+            aiInsights.map((insight) => (
+              <AIInsightCard key={insight.id} insight={insight} />
+            ))
+          )}
         </TabsContent>
 
         <TabsContent value="savings" className="space-y-3 mt-4">
-          {savingsInsights.length > 0 ? (
+          {isLoadingInsights ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="text-4xl mb-3">🤖</div>
+                <p className="text-sm text-slate-600">
+                  절약 기회를 찾는 중...
+                </p>
+              </CardContent>
+            </Card>
+          ) : savingsInsights.length > 0 ? (
             savingsInsights.map((insight) => (
               <AIInsightCard key={insight.id} insight={insight} />
             ))
@@ -199,7 +253,16 @@ export default function InsightsPage() {
         </TabsContent>
 
         <TabsContent value="warnings" className="space-y-3 mt-4">
-          {warningInsights.length > 0 ? (
+          {isLoadingInsights ? (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <div className="text-4xl mb-3">🤖</div>
+                <p className="text-sm text-slate-600">
+                  주의 항목을 확인하는 중...
+                </p>
+              </CardContent>
+            </Card>
+          ) : warningInsights.length > 0 ? (
             warningInsights.map((insight) => (
               <AIInsightCard key={insight.id} insight={insight} />
             ))

@@ -9,48 +9,9 @@ import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatShortDate } from "@/lib/utils";
 import { AIInsight } from "@/types/insight";
 import { useTransactionsStore } from "@/lib/store/transactions-store";
-import { useMemo } from "react";
-
-// Mock data - AI Insights (ML 서비스 연결 전까지 사용)
-const MOCK_INSIGHTS: AIInsight[] = [
-    {
-        id: "1",
-        user_id: "user1",
-        type: "overspending",
-        severity: "warning",
-        title: "식비 지출이 증가하고 있어요",
-        description:
-            "지난달 대비 식비가 15% 증가했습니다. 배달 음식과 카페 이용이 주요 원인입니다.",
-        suggested_action:
-            "주 2회 배달 음식을 줄이면 월 5만원을 절약할 수 있어요",
-        potential_savings: 50000,
-        category: "food",
-        created_at: new Date().toISOString(),
-    },
-    {
-        id: "2",
-        user_id: "user1",
-        type: "savings_opportunity",
-        severity: "info",
-        title: "교통비 절약 기회",
-        description:
-            "최근 택시 이용이 많았습니다. 대중교통을 이용하면 교통비를 절감할 수 있습니다.",
-        suggested_action: "주 3회 대중교통 이용으로 월 3만원 절약 가능",
-        potential_savings: 30000,
-        category: "transport",
-        created_at: new Date().toISOString(),
-    },
-    {
-        id: "3",
-        user_id: "user1",
-        type: "trend_decrease",
-        severity: "info",
-        title: "쇼핑 지출이 감소했어요! 👏",
-        description: "지난달 대비 쇼핑 지출이 20% 감소했습니다. 잘하고 계세요!",
-        category: "shopping",
-        created_at: new Date().toISOString(),
-    },
-];
+import { useMemo, useState, useEffect } from "react";
+import { mlApiClient } from "@/lib/ml/client";
+import { createClient } from "@/lib/supabase/client";
 
 const CATEGORY_LABELS: Record<string, string> = {
     food: "식비",
@@ -65,6 +26,12 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function DashboardPage() {
     const { transactions } = useTransactionsStore();
+    const supabase = createClient();
+
+    // AI Insights 상태
+    const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
+    const [isLoadingInsights, setIsLoadingInsights] = useState(false);
+    const [insightsError, setInsightsError] = useState<string | null>(null);
 
     // 실시간 총 지출 계산
     const totalSpent = useMemo(() => {
@@ -74,7 +41,95 @@ export default function DashboardPage() {
     // 월 예산 (나중에 설정 기능 추가 예정)
     const monthlyBudget = 700000;
     const budgetRemaining = monthlyBudget - totalSpent;
-    const budgetUsedPercentage = (totalSpent / monthlyBudget) * 100;
+
+    // ML API에서 AI 인사이트 가져오기
+    useEffect(() => {
+        const fetchInsights = async () => {
+            // 거래 내역이 없으면 인사이트를 가져오지 않음
+            if (transactions.length === 0) {
+                setAiInsights([]);
+                return;
+            }
+
+            setIsLoadingInsights(true);
+            setInsightsError(null);
+
+            try {
+                // 현재 사용자 ID 가져오기
+                const {
+                    data: { user },
+                } = await supabase.auth.getUser();
+                if (!user) {
+                    throw new Error("User not authenticated");
+                }
+
+                // 예산 데이터 준비 (카테고리별)
+                const currentMonthBudget = {
+                    food: 300000,
+                    transport: 100000,
+                    shopping: 150000,
+                    entertainment: 100000,
+                    education: 50000,
+                    health: 30000,
+                    utilities: 50000,
+                    other: 20000,
+                };
+
+                // ML API 호출
+                const response = await mlApiClient.generateInsights({
+                    user_id: user.id,
+                    transactions: transactions.map((t) => ({
+                        date: t.date,
+                        amount: t.amount,
+                        category: t.category,
+                        description: t.description,
+                    })),
+                    current_month_budget: currentMonthBudget,
+                });
+
+                // 인사이트 설정 (ML API 응답을 AIInsight 타입으로 변환)
+                const insights: AIInsight[] = (response.insights || []).map(
+                    (insight, index) => ({
+                        ...insight,
+                        id: `${user.id}-${Date.now()}-${index}`,
+                        user_id: user.id,
+                        created_at: new Date().toISOString(),
+                    })
+                );
+                setAiInsights(insights);
+            } catch (error) {
+                console.error("Failed to fetch AI insights:", error);
+
+                // 에러 메시지를 더 자세하게 표시
+                let errorMessage = "AI 인사이트를 불러올 수 없습니다.";
+                if (error instanceof Error) {
+                    errorMessage += ` (${error.message})`;
+                    console.error("Error details:", error.message);
+                }
+
+                // ML 서비스 연결 확인
+                try {
+                    const response = await fetch(
+                        "http://localhost:8000/health"
+                    );
+                    if (!response.ok) {
+                        errorMessage =
+                            "ML 서비스가 실행되지 않았습니다. 터미널에서 ML 서비스를 시작해주세요.";
+                    }
+                } catch {
+                    errorMessage =
+                        "ML 서비스에 연결할 수 없습니다. 터미널에서 ML 서비스를 시작해주세요.";
+                }
+
+                setInsightsError(errorMessage);
+                setAiInsights([]);
+            } finally {
+                setIsLoadingInsights(false);
+            }
+        };
+
+        fetchInsights();
+    }, [transactions, supabase]);
 
     // 카테고리별 지출 계산
     const categoryData = useMemo(() => {
@@ -207,15 +262,55 @@ export default function DashboardPage() {
                             variant="default"
                             className="text-[10px] px-2 py-0.5"
                         >
-                            New
+                            AI
                         </Badge>
                     </div>
                 </div>
-                <div className="space-y-3">
-                    {MOCK_INSIGHTS.map((insight) => (
-                        <AIInsightCard key={insight.id} insight={insight} />
-                    ))}
-                </div>
+
+                {isLoadingInsights ? (
+                    <Card>
+                        <CardContent className="p-12 text-center">
+                            <div className="text-4xl mb-3">🤖</div>
+                            <p className="text-sm text-slate-600">
+                                AI가 당신의 소비 패턴을 분석하고 있습니다...
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : insightsError ? (
+                    <Card className="border-red-200 bg-red-50">
+                        <CardContent className="p-6 text-center">
+                            <div className="text-3xl mb-2">⚠️</div>
+                            <p className="text-sm text-red-700">
+                                {insightsError}
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : aiInsights.length === 0 ? (
+                    <Card>
+                        <CardContent className="p-12 text-center">
+                            <div className="text-4xl mb-3">💡</div>
+                            <p className="text-sm text-slate-600">
+                                {transactions.length === 0
+                                    ? "지출 내역을 추가하면 AI가 인사이트를 제공합니다"
+                                    : "현재 특별한 인사이트가 없습니다. 계속 현명한 소비를 하세요!"}
+                            </p>
+                        </CardContent>
+                    </Card>
+                ) : (
+                    <div className="space-y-3">
+                        {aiInsights.slice(0, 3).map((insight) => (
+                            <AIInsightCard key={insight.id} insight={insight} />
+                        ))}
+                        {aiInsights.length > 3 && (
+                            <a
+                                href="/dashboard/insights"
+                                className="block text-center py-3 text-sm font-semibold text-violet-600 hover:text-violet-700 active:text-violet-800"
+                            >
+                                전체 인사이트 보기 ({aiInsights.length}개) →
+                            </a>
+                        )}
+                    </div>
+                )}
             </section>
 
             {/* Recent Transactions - 실제 데이터 사용 */}

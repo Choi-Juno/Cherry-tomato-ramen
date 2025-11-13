@@ -80,7 +80,7 @@ export default function TransactionsPage() {
       quarter: 90,
       year: 365,
     };
-    const periodDays = periodDaysMap[periodFilter] || 30; // 기본값 30일
+    const periodDays: number = periodDaysMap[periodFilter] ?? 30; // 기본값 30일
 
     filtered = filtered.filter((t) => {
       const transDate = new Date(t.date);
@@ -111,7 +111,7 @@ export default function TransactionsPage() {
           description: "거래 내역이 삭제되었습니다.",
           variant: "success",
         });
-      } catch (error) {
+      } catch {
         addToast({
           title: "삭제 실패",
           description: "거래 삭제 중 오류가 발생했습니다.",

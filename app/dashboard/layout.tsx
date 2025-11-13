@@ -70,7 +70,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         variant: "success",
         duration: 3000,
       });
-    } catch (error) {
+    } catch {
       addToast({
         title: "오류 발생",
         description: "지출 추가 중 문제가 발생했습니다.",

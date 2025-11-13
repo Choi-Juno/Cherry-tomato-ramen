@@ -6,9 +6,10 @@ Main application for AI-powered spending insights
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Any
 import sys
 import os
+import numpy as np
 
 # Add parent directory to path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -34,6 +35,23 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Helper function to convert numpy types to Python native types
+def convert_numpy_types(obj: Any) -> Any:
+    """Convert numpy types to Python native types for JSON serialization"""
+    if isinstance(obj, np.integer):
+        return int(obj)
+    elif isinstance(obj, np.floating):
+        return float(obj)
+    elif isinstance(obj, np.bool_):
+        return bool(obj)
+    elif isinstance(obj, np.ndarray):
+        return obj.tolist()
+    elif isinstance(obj, dict):
+        return {key: convert_numpy_types(value) for key, value in obj.items()}
+    elif isinstance(obj, list):
+        return [convert_numpy_types(item) for item in obj]
+    return obj
 
 # Pydantic models for request/response
 class Transaction(BaseModel):
@@ -134,8 +152,8 @@ async def generate_insights(request: InsightRequest):
         AI insights, persona, trends, and risk assessment
     """
     try:
-        # Convert transactions to dict
-        transactions = [t.dict() for t in request.transactions]
+        # Convert transactions to dict (Pydantic V2 uses model_dump)
+        transactions = [t.model_dump() for t in request.transactions]
         
         if not transactions:
             raise HTTPException(
@@ -299,6 +317,12 @@ async def generate_insights(request: InsightRequest):
         # Sort insights by severity
         severity_order = {'critical': 0, 'warning': 1, 'info': 2}
         insights.sort(key=lambda x: severity_order.get(x['severity'], 3))
+        
+        # Convert all numpy types to Python native types for JSON serialization
+        insights = convert_numpy_types(insights)
+        persona_result = convert_numpy_types(persona_result)
+        trend_results = convert_numpy_types(trend_results)
+        overspending_result = convert_numpy_types(overspending_result)
         
         return InsightResponse(
             user_id=request.user_id,
