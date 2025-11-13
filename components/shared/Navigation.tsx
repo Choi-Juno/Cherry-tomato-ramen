@@ -71,7 +71,7 @@ export function Navigation() {
   return (
     <>
       {/* Mobile Top Header */}
-      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm dark:bg-slate-800 dark:border-slate-700">
+      <header className="sticky top-0 z-30 bg-white border-b border-slate-200 shadow-sm dark:bg-slate-900 dark:border-slate-800">
         <div className="flex h-14 items-center justify-between px-4">
           <Link href="/dashboard" className="flex items-center gap-2">
             <span className="text-xl">🍅</span>
@@ -103,8 +103,8 @@ export function Navigation() {
                 />
                 
                 {/* Menu */}
-                <div className="absolute right-0 top-12 z-50 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden dark:bg-slate-800 dark:border-slate-700">
-                  <div className="p-4 border-b border-slate-200 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-900/30 dark:to-purple-900/30 dark:border-slate-700">
+                <div className="absolute right-0 top-12 z-50 w-64 bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden dark:bg-slate-900 dark:border-slate-800">
+                  <div className="p-4 border-b border-slate-200 bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/50 dark:to-purple-950/50 dark:border-slate-800">
                     <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">로그인 계정</p>
                     <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 truncate">
                       {userEmail || "사용자"}
@@ -130,7 +130,7 @@ export function Navigation() {
       </header>
 
       {/* Mobile Bottom Navigation (Fixed) */}
-      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg pb-safe dark:bg-slate-800 dark:border-slate-700">
+      <nav className="fixed bottom-0 left-0 right-0 z-40 bg-white border-t border-slate-200 shadow-lg pb-safe dark:bg-slate-900 dark:border-slate-800">
         <div className="flex items-center justify-around">
           {NAV_ITEMS.map((item) => {
             const isActive = pathname === item.href;

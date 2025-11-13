@@ -8,11 +8,11 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default: "bg-violet-600 text-white hover:bg-violet-700 focus-visible:ring-violet-600 dark:bg-violet-500 dark:hover:bg-violet-600",
+        default: "bg-violet-600 text-white hover:bg-violet-700 focus-visible:ring-violet-600",
         destructive: "bg-red-600 text-white hover:bg-red-700 focus-visible:ring-red-600",
-        outline: "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50 focus-visible:ring-slate-400 dark:border-slate-600 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600",
-        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 focus-visible:ring-slate-400 dark:bg-slate-700 dark:text-slate-100 dark:hover:bg-slate-600",
-        ghost: "text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-slate-100 dark:hover:bg-slate-700",
+        outline: "border border-slate-300 bg-white text-slate-900 hover:bg-slate-50 focus-visible:ring-slate-400 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:hover:bg-slate-800",
+        secondary: "bg-slate-100 text-slate-900 hover:bg-slate-200 focus-visible:ring-slate-400 dark:bg-slate-800 dark:text-slate-100 dark:hover:bg-slate-700",
+        ghost: "text-slate-900 hover:bg-slate-100 focus-visible:ring-slate-400 dark:text-slate-100 dark:hover:bg-slate-800",
         link: "text-violet-600 underline-offset-4 hover:underline dark:text-violet-400",
       },
       size: {
