@@ -1,3 +1,5 @@
+"use client";
+
 import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
 import { SpendingChart } from "@/components/dashboard/SpendingChart";
 import { CategoryAnalysis } from "@/components/dashboard/CategoryAnalysis";
@@ -6,6 +8,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { formatCurrency, formatShortDate } from "@/lib/utils";
 import { AIInsight } from "@/types/insight";
+import { useTransactionsStore } from "@/lib/store/transactions-store";
+import { useMemo } from "react";
 
 // Mock data - will be replaced with real data from Supabase
 const MOCK_SUMMARY = {
@@ -88,6 +92,25 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 export default function DashboardPage() {
+  const { transactions } = useTransactionsStore();
+
+  // Get recent transactions (최근 5개)
+  const recentTransactions = useMemo(() => {
+    return transactions.slice(0, 5);
+  }, [transactions]);
+
+  // 카테고리 아이콘 맵핑
+  const categoryIcons: Record<string, string> = {
+    food: "🍽️",
+    transport: "🚗",
+    shopping: "🛍️",
+    entertainment: "🎬",
+    education: "📚",
+    health: "💊",
+    utilities: "💡",
+    other: "📦",
+  };
+
   return (
     <div className="space-y-5">
       {/* Page Header */}
@@ -127,7 +150,7 @@ export default function DashboardPage() {
         </div>
       </section>
 
-      {/* Recent Transactions */}
+      {/* Recent Transactions - 실제 데이터 사용 */}
       <section>
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-xl font-bold text-slate-900">최근 내역</h2>
@@ -139,42 +162,54 @@ export default function DashboardPage() {
             <span className="text-xs">→</span>
           </a>
         </div>
-        <Card className="overflow-hidden shadow-sm">
-          <CardContent className="p-0">
-            <div className="divide-y divide-slate-100">
-              {MOCK_RECENT_TRANSACTIONS.map((transaction) => (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between p-4 active:bg-slate-50 transition-colors"
-                >
-                  <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
-                      <span className="text-xl">
-                        {transaction.category === "food" && "🍽️"}
-                        {transaction.category === "transport" && "🚗"}
-                        {transaction.category === "shopping" && "🛍️"}
-                        {transaction.category === "entertainment" && "🎬"}
-                      </span>
+
+        {recentTransactions.length === 0 ? (
+          <Card className="overflow-hidden shadow-sm">
+            <CardContent className="p-12 text-center">
+              <div className="text-5xl mb-4">📝</div>
+              <h3 className="text-lg font-bold text-slate-900 mb-2">
+                아직 지출 내역이 없어요
+              </h3>
+              <p className="text-sm text-slate-600 mb-4">
+                우측 하단 + 버튼을 눌러 첫 지출을 기록해보세요!
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <Card className="overflow-hidden shadow-sm">
+            <CardContent className="p-0">
+              <div className="divide-y divide-slate-100">
+                {recentTransactions.map((transaction) => (
+                  <div
+                    key={transaction.id}
+                    className="flex items-center justify-between p-4 active:bg-slate-50 transition-colors"
+                  >
+                    <div className="flex items-center gap-3 flex-1 min-w-0">
+                      <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                        <span className="text-xl">
+                          {categoryIcons[transaction.category] || "📦"}
+                        </span>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-semibold text-slate-900 text-sm truncate">
+                          {transaction.description}
+                        </p>
+                        <p className="text-xs text-slate-500 truncate">
+                          {CATEGORY_LABELS[transaction.category]} • {formatShortDate(new Date(transaction.date))}
+                        </p>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-slate-900 text-sm truncate">
-                        {transaction.description}
-                      </p>
-                      <p className="text-xs text-slate-500 truncate">
-                        {CATEGORY_LABELS[transaction.category]} • {formatShortDate(transaction.date)}
+                    <div className="text-right flex-shrink-0 ml-3">
+                      <p className="font-bold text-slate-900 text-base">
+                        {formatCurrency(transaction.amount)}
                       </p>
                     </div>
                   </div>
-                  <div className="text-right flex-shrink-0 ml-3">
-                    <p className="font-bold text-slate-900 text-base">
-                      {formatCurrency(transaction.amount)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </section>
     </div>
   );
