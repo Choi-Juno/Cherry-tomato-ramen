@@ -179,3 +179,5 @@ Now begin with PHASE 1, step 1:
 "Reinterpret the UI hierarchy using the provided components."
 
 ```
+
+# 2nd 기능 추가 프롬프트

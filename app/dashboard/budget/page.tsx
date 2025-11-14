@@ -150,8 +150,8 @@ export default function BudgetPage() {
     <div className="space-y-5">
       {/* Page Header */}
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-slate-900">예산 관리</h1>
-        <p className="text-sm text-slate-600 mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">예산 관리</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
           카테고리별 예산을 설정하고 지출을 관리하세요
         </p>
       </div>
@@ -160,8 +160,8 @@ export default function BudgetPage() {
       <div className="grid gap-3 grid-cols-3">
         <Card className="shadow-sm">
           <CardContent className="p-4">
-            <p className="text-xs text-slate-600 mb-1">총 예산</p>
-            <p className="text-xl font-bold text-slate-900">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">총 예산</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
               {formatCurrency(totalBudget)}
             </p>
           </CardContent>
@@ -169,11 +169,11 @@ export default function BudgetPage() {
 
         <Card className="shadow-sm">
           <CardContent className="p-4">
-            <p className="text-xs text-slate-600 mb-1">총 지출</p>
-            <p className="text-xl font-bold text-violet-600">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">총 지출</p>
+            <p className="text-xl font-bold text-violet-600 dark:text-violet-400">
               {formatCurrency(totalSpent)}
             </p>
-            <p className="text-[10px] text-slate-500 mt-1">
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
               {totalBudget > 0
                 ? `${((totalSpent / totalBudget) * 100).toFixed(0)}% 사용`
                 : "미설정"}
@@ -183,16 +183,16 @@ export default function BudgetPage() {
 
         <Card className="shadow-sm">
           <CardContent className="p-4">
-            <p className="text-xs text-slate-600 mb-1">남은 예산</p>
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">남은 예산</p>
             <p
               className={`text-xl font-bold ${
-                totalRemaining < 0 ? "text-red-600" : "text-emerald-600"
+                totalRemaining < 0 ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
               }`}
             >
               {formatCurrency(Math.abs(totalRemaining))}
             </p>
             {totalRemaining < 0 && (
-              <p className="text-[10px] text-red-500 mt-1">초과</p>
+              <p className="text-[10px] text-red-500 dark:text-red-400 mt-1">초과</p>
             )}
           </CardContent>
         </Card>
@@ -226,14 +226,14 @@ export default function BudgetPage() {
                 <div key={item.category} className="space-y-2">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-3 flex-1">
-                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                      <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 flex items-center justify-center flex-shrink-0 shadow-sm">
                         <span className="text-lg">
                           {categoryIcons[item.category]}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <p className="font-semibold text-slate-900 text-sm">
+                          <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                             {CATEGORY_LABELS[item.category]}
                           </p>
                           {status.severity === "danger" && (
@@ -243,7 +243,7 @@ export default function BudgetPage() {
                             <Badge variant="warning" className="text-[9px] px-1.5 py-0">주의</Badge>
                           )}
                         </div>
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs text-slate-500 dark:text-slate-400">
                           {formatCurrency(item.spent)} / {formatCurrency(item.budget)}
                         </p>
                       </div>
@@ -292,7 +292,7 @@ export default function BudgetPage() {
                       value={Math.min(percentage, 100)}
                       className="h-2"
                     />
-                    <p className="text-[10px] text-slate-500 text-right">
+                    <p className="text-[10px] text-slate-500 dark:text-slate-400 text-right">
                       {percentage.toFixed(0)}% 사용
                     </p>
                   </div>
@@ -304,12 +304,12 @@ export default function BudgetPage() {
       </Card>
 
       {/* Tips */}
-      <Card className="bg-gradient-to-br from-violet-50 to-purple-50 border-violet-200 shadow-sm">
+      <Card className="bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/50 dark:to-purple-950/50 border-violet-200 dark:border-violet-900/50 shadow-sm">
         <CardContent className="p-4">
-          <h3 className="font-semibold text-violet-900 mb-2 text-sm">
+          <h3 className="font-semibold text-violet-900 dark:text-violet-300 mb-2 text-sm">
             💡 예산 설정 팁
           </h3>
-          <ul className="space-y-1 text-xs text-violet-800 leading-relaxed">
+          <ul className="space-y-1 text-xs text-violet-800 dark:text-violet-400 leading-relaxed">
             <li>• 50-30-20 법칙: 생활비 50%, 여가 30%, 저축 20%</li>
             <li>• 식비는 월 수입의 20-25%가 적정</li>
             <li>• 예산의 80%에 도달하면 지출 줄이기</li>

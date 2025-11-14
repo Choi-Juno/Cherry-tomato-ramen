@@ -26,14 +26,14 @@ const CATEGORY_LABELS: Record<string, string> = {
 };
 
 const CATEGORY_COLORS: Record<string, string> = {
-  food: "bg-violet-100 text-violet-700",
-  transport: "bg-blue-100 text-blue-700",
-  shopping: "bg-pink-100 text-pink-700",
-  entertainment: "bg-amber-100 text-amber-700",
-  education: "bg-emerald-100 text-emerald-700",
-  health: "bg-red-100 text-red-700",
-  utilities: "bg-slate-100 text-slate-700",
-  other: "bg-gray-100 text-gray-700",
+  food: "bg-violet-100 text-violet-700 dark:bg-violet-950/50 dark:text-violet-300",
+  transport: "bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+  shopping: "bg-pink-100 text-pink-700 dark:bg-pink-950/50 dark:text-pink-300",
+  entertainment: "bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+  education: "bg-emerald-100 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+  health: "bg-red-100 text-red-700 dark:bg-red-950/50 dark:text-red-300",
+  utilities: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
+  other: "bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300",
 };
 
 export default function TransactionsPage() {
@@ -128,8 +128,8 @@ export default function TransactionsPage() {
     <div className="space-y-5">
       {/* Page Header */}
       <div className="pt-2">
-        <h1 className="text-2xl font-bold text-slate-900">거래 내역</h1>
-        <p className="text-sm text-slate-600 mt-1">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">거래 내역</h1>
+        <p className="text-sm text-slate-600 dark:text-slate-400 mt-1">
           모든 지출 내역을 확인하고 관리하세요
         </p>
       </div>
@@ -186,24 +186,24 @@ export default function TransactionsPage() {
       <div className="grid gap-3 grid-cols-3">
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-slate-600 mb-1">거래 건수</p>
-            <p className="text-xl font-bold text-slate-900">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">거래 건수</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
               {stats.count}건
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-slate-600 mb-1">총 지출</p>
-            <p className="text-xl font-bold text-slate-900">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">총 지출</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
               {formatCurrency(stats.total)}
             </p>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="p-4">
-            <p className="text-xs text-slate-600 mb-1">평균</p>
-            <p className="text-xl font-bold text-slate-900">
+            <p className="text-xs text-slate-600 dark:text-slate-400 mb-1">평균</p>
+            <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
               {formatCurrency(Math.floor(stats.average))}
             </p>
           </CardContent>
@@ -215,10 +215,10 @@ export default function TransactionsPage() {
         <Card>
           <CardContent className="p-12 text-center">
             <div className="text-5xl mb-4">🔍</div>
-            <h3 className="text-lg font-bold text-slate-900 mb-2">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-slate-100 mb-2">
               거래 내역이 없습니다
             </h3>
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               {searchQuery || categoryFilter !== "all"
                 ? "검색 조건을 변경해보세요"
                 : "우측 하단 + 버튼을 눌러 지출을 추가해보세요"}
@@ -228,14 +228,14 @@ export default function TransactionsPage() {
       ) : (
         <Card>
           <CardContent className="p-0">
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-slate-100 dark:divide-slate-800">
               {filteredTransactions.map((transaction) => (
                 <div
                   key={transaction.id}
-                  className="flex items-center justify-between p-4 active:bg-slate-50 transition-colors"
+                  className="flex items-center justify-between p-4 active:bg-slate-50 dark:active:bg-slate-800 transition-colors"
                 >
                   <div className="flex items-center gap-3 flex-1 min-w-0">
-                    <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center flex-shrink-0 shadow-sm">
+                    <div className="h-11 w-11 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 flex items-center justify-center flex-shrink-0 shadow-sm">
                       <span className="text-xl">
                         {categoryIcons[transaction.category] || "📦"}
                       </span>
@@ -243,7 +243,7 @@ export default function TransactionsPage() {
 
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
-                        <p className="font-semibold text-slate-900 text-sm truncate">
+                        <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm truncate">
                           {transaction.description}
                         </p>
                         <Badge
@@ -253,7 +253,7 @@ export default function TransactionsPage() {
                           {CATEGORY_LABELS[transaction.category]}
                         </Badge>
                       </div>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {transaction.merchant && `${transaction.merchant} • `}
                         {formatDate(transaction.date)}
                       </p>
@@ -262,10 +262,10 @@ export default function TransactionsPage() {
 
                   <div className="flex items-center gap-2 ml-3">
                     <div className="text-right">
-                      <p className="font-bold text-slate-900 text-base">
+                      <p className="font-bold text-slate-900 dark:text-slate-100 text-base">
                         {formatCurrency(transaction.amount)}
                       </p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">
                         {transaction.payment_method === "card" && "카드"}
                         {transaction.payment_method === "cash" && "현금"}
                         {transaction.payment_method === "transfer" && "이체"}
@@ -275,7 +275,7 @@ export default function TransactionsPage() {
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 w-9 p-0 text-red-600 hover:text-red-700 hover:bg-red-50"
+                      className="h-9 w-9 p-0 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50"
                       onClick={() =>
                         handleDelete(transaction.id, transaction.description)
                       }

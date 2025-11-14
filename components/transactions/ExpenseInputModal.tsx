@@ -120,7 +120,7 @@ export function ExpenseInputModal({
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           {/* Amount - Highlighted */}
           <div className="space-y-2">
-            <label htmlFor="amount" className="text-sm font-semibold text-slate-700">
+            <label htmlFor="amount" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               금액 *
             </label>
             <Input
@@ -139,7 +139,7 @@ export function ExpenseInputModal({
 
           {/* Description */}
           <div className="space-y-2">
-            <label htmlFor="description" className="text-sm font-semibold text-slate-700">
+            <label htmlFor="description" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
               내용 *
             </label>
             <Input
@@ -159,7 +159,7 @@ export function ExpenseInputModal({
           <div className="grid grid-cols-2 gap-3">
             {/* Category */}
             <div className="space-y-2">
-              <label htmlFor="category" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="category" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 카테고리 *
               </label>
               <Select
@@ -183,7 +183,7 @@ export function ExpenseInputModal({
 
             {/* Payment Method */}
             <div className="space-y-2">
-              <label htmlFor="payment_method" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="payment_method" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 결제 수단 *
               </label>
               <Select
@@ -210,7 +210,7 @@ export function ExpenseInputModal({
           <div className="grid grid-cols-2 gap-3">
             {/* Merchant (Optional) */}
             <div className="space-y-2">
-              <label htmlFor="merchant" className="text-sm font-medium text-slate-700">
+              <label htmlFor="merchant" className="text-sm font-medium text-slate-700 dark:text-slate-300">
                 장소
               </label>
               <Input
@@ -223,7 +223,7 @@ export function ExpenseInputModal({
 
             {/* Date */}
             <div className="space-y-2">
-              <label htmlFor="date" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="date" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 날짜 *
               </label>
               <Input id="date" type="date" {...register("date")} className="h-12" />

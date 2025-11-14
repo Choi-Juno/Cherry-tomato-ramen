@@ -53,10 +53,10 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   // 로딩 중
   if (isCheckingAuth) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950 flex items-center justify-center">
         <div className="text-center">
           <div className="text-6xl mb-4">🍅</div>
-          <p className="text-lg font-semibold text-slate-700">로딩 중...</p>
+          <p className="text-lg font-semibold text-slate-700 dark:text-slate-300">로딩 중...</p>
         </div>
       </div>
     );
@@ -84,7 +84,7 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100">
+    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-slate-100 dark:from-slate-900 dark:to-slate-950">
       <Navigation />
       <main className="px-4 py-4 pb-24">
         {children}

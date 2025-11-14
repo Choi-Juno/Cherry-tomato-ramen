@@ -63,15 +63,15 @@ export function SpendingSummary({
         <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex flex-col">
-              <p className="text-xs font-medium text-slate-600 mb-1">남은 예산</p>
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">남은 예산</p>
               <p
                 className={`text-2xl font-bold ${
-                  isOverBudget ? "text-red-600" : "text-emerald-600"
+                  isOverBudget ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
                 }`}
               >
                 {formatCurrency(Math.abs(budgetRemaining))}
               </p>
-              <p className="text-[10px] text-slate-500 mt-1">
+              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                 {isOverBudget ? "⚠️ 예산 초과" : `✓ ${(100 - budgetUsedPercentage).toFixed(0)}% 남음`}
               </p>
             </div>
@@ -82,12 +82,12 @@ export function SpendingSummary({
         <Card className="shadow-sm">
           <CardContent className="p-4">
             <div className="flex flex-col">
-              <p className="text-xs font-medium text-slate-600 mb-1">월 예산</p>
-              <p className="text-2xl font-bold text-slate-900">
+              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">월 예산</p>
+              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
                 {formatCurrency(monthlyBudget)}
               </p>
               <div className="mt-2">
-                <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
                   <div
                     className={`h-full transition-all ${
                       budgetUsedPercentage > 90
@@ -99,7 +99,7 @@ export function SpendingSummary({
                     style={{ width: `${Math.min(budgetUsedPercentage, 100)}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 mt-1">
+                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
                   {budgetUsedPercentage.toFixed(0)}% 사용 중
                 </p>
               </div>

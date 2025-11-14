@@ -65,14 +65,14 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-4">
           <div className="text-6xl mb-4">🍅</div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
             AI 소비 코치
           </CardTitle>
-          <p className="text-sm text-slate-600 mt-2">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
             대학생을 위한 스마트 가계부
           </p>
         </CardHeader>
@@ -80,7 +80,7 @@ export default function LoginPage() {
         <CardContent>
           <form onSubmit={handleLogin} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 이메일
               </label>
               <Input
@@ -96,7 +96,7 @@ export default function LoginPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 비밀번호
               </label>
               <Input
@@ -120,20 +120,20 @@ export default function LoginPage() {
             </Button>
           </form>
 
-          <div className="mt-6 p-4 bg-violet-50 rounded-xl border border-violet-200">
-            <p className="text-xs font-semibold text-violet-900 mb-2">💡 테스트 계정</p>
-            <div className="space-y-1 text-xs text-violet-800">
-              <p>📧 이메일: <code className="bg-white px-2 py-0.5 rounded">test@example.com</code></p>
-              <p>🔑 비밀번호: <code className="bg-white px-2 py-0.5 rounded">test123456</code></p>
+          <div className="mt-6 p-4 bg-violet-50 dark:bg-slate-800 rounded-xl border border-violet-200 dark:border-slate-700">
+            <p className="text-xs font-semibold text-violet-900 dark:text-violet-300 mb-2">💡 테스트 계정</p>
+            <div className="space-y-1 text-xs text-violet-800 dark:text-violet-400">
+              <p>📧 이메일: <code className="bg-white dark:bg-slate-700 dark:text-slate-200 px-2 py-0.5 rounded">test@example.com</code></p>
+              <p>🔑 비밀번호: <code className="bg-white dark:bg-slate-700 dark:text-slate-200 px-2 py-0.5 rounded">test123456</code></p>
             </div>
           </div>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               계정이 없으신가요?{" "}
               <Link
                 href="/signup"
-                className="font-semibold text-violet-600 hover:text-violet-700"
+                className="font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300"
               >
                 회원가입
               </Link>

@@ -16,33 +16,33 @@ const INSIGHT_CONFIG: Record<
 > = {
   overspending: {
     icon: AlertTriangle,
-    color: "text-red-600",
-    bgColor: "bg-red-50",
+    color: "text-red-600 dark:text-red-400",
+    bgColor: "bg-red-50 dark:bg-red-950/50",
   },
   trend_increase: {
     icon: TrendingUp,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-50 dark:bg-amber-950/50",
   },
   trend_decrease: {
     icon: TrendingDown,
-    color: "text-emerald-600",
-    bgColor: "bg-emerald-50",
+    color: "text-emerald-600 dark:text-emerald-400",
+    bgColor: "bg-emerald-50 dark:bg-emerald-950/50",
   },
   savings_opportunity: {
     icon: Lightbulb,
-    color: "text-violet-600",
-    bgColor: "bg-violet-50",
+    color: "text-violet-600 dark:text-violet-400",
+    bgColor: "bg-violet-50 dark:bg-violet-950/50",
   },
   category_warning: {
     icon: AlertTriangle,
-    color: "text-amber-600",
-    bgColor: "bg-amber-50",
+    color: "text-amber-600 dark:text-amber-400",
+    bgColor: "bg-amber-50 dark:bg-amber-950/50",
   },
   spending_persona: {
     icon: Info,
-    color: "text-blue-600",
-    bgColor: "bg-blue-50",
+    color: "text-blue-600 dark:text-blue-400",
+    bgColor: "bg-blue-50 dark:bg-blue-950/50",
   },
 };
 
@@ -68,7 +68,7 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
           {/* Content */}
           <div className="flex-1 space-y-2 min-w-0">
             <div className="flex items-start justify-between gap-2">
-              <h3 className="font-bold text-sm text-slate-900 leading-tight">
+              <h3 className="font-bold text-sm text-slate-900 dark:text-slate-100 leading-tight">
                 {insight.title}
               </h3>
               <Badge variant={SEVERITY_VARIANTS[insight.severity]} className="shrink-0 text-[9px] px-2 py-0.5">
@@ -78,13 +78,13 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
               </Badge>
             </div>
 
-            <p className="text-xs text-slate-600 leading-relaxed">
+            <p className="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
               {insight.description}
             </p>
 
             {insight.suggested_action && (
-              <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 p-3 border border-violet-100">
-                <p className="text-xs text-slate-700 leading-relaxed">
+              <div className="rounded-xl bg-gradient-to-br from-violet-50 to-purple-50 dark:from-violet-950/50 dark:to-purple-950/50 p-3 border border-violet-100 dark:border-violet-900/50">
+                <p className="text-xs text-slate-700 dark:text-slate-300 leading-relaxed">
                   <span className="font-bold">💡 AI 제안</span>
                   <br />
                   {insight.suggested_action}
@@ -93,9 +93,9 @@ export function AIInsightCard({ insight }: AIInsightCardProps) {
             )}
 
             {insight.potential_savings && insight.potential_savings > 0 && (
-              <div className="flex items-center gap-2 text-xs bg-emerald-50 rounded-lg px-3 py-2">
-                <span className="text-emerald-700 font-medium">💰 절약 가능</span>
-                <span className="font-bold text-emerald-600 text-sm">
+              <div className="flex items-center gap-2 text-xs bg-emerald-50 dark:bg-emerald-950/50 rounded-lg px-3 py-2 border border-emerald-100 dark:border-emerald-900/50">
+                <span className="text-emerald-700 dark:text-emerald-400 font-medium">💰 절약 가능</span>
+                <span className="font-bold text-emerald-600 dark:text-emerald-400 text-sm">
                   {formatCurrency(insight.potential_savings)}
                 </span>
               </div>

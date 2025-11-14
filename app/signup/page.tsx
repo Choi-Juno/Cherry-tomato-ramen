@@ -142,21 +142,21 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-violet-50 via-purple-50 to-pink-50 dark:from-slate-900 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center p-4">
       <Card className="w-full max-w-md shadow-2xl">
         <CardHeader className="text-center pb-4">
           <Link
             href="/login"
-            className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 transition-colors"
+            className="absolute left-4 top-4 flex h-9 w-9 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors"
           >
-            <ArrowLeft className="h-5 w-5 text-slate-600" />
+            <ArrowLeft className="h-5 w-5 text-slate-600 dark:text-slate-400" />
           </Link>
           
           <div className="text-6xl mb-4">🍅</div>
           <CardTitle className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
             회원가입
           </CardTitle>
-          <p className="text-sm text-slate-600 mt-2">
+          <p className="text-sm text-slate-600 dark:text-slate-400 mt-2">
             AI 소비 코치와 함께 시작하세요
           </p>
         </CardHeader>
@@ -164,7 +164,7 @@ export default function SignupPage() {
         <CardContent>
           <form onSubmit={handleSignup} className="space-y-4">
             <div className="space-y-2">
-              <label htmlFor="name" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="name" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 이름
               </label>
               <Input
@@ -181,7 +181,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="email" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 이메일
               </label>
               <Input
@@ -198,7 +198,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="password" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 비밀번호
               </label>
               <Input
@@ -215,7 +215,7 @@ export default function SignupPage() {
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="confirmPassword" className="text-sm font-semibold text-slate-700">
+              <label htmlFor="confirmPassword" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
                 비밀번호 확인
               </label>
               <Input
@@ -241,11 +241,11 @@ export default function SignupPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-slate-600">
+            <p className="text-sm text-slate-600 dark:text-slate-400">
               이미 계정이 있으신가요?{" "}
               <Link
                 href="/login"
-                className="font-semibold text-violet-600 hover:text-violet-700"
+                className="font-semibold text-violet-600 dark:text-violet-400 hover:text-violet-700 dark:hover:text-violet-300"
               >
                 로그인
               </Link>

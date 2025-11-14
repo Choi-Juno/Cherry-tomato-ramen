@@ -41,12 +41,12 @@ function createCategoryTooltip(total: number) {
     if (active && payload && payload.length) {
       const percentage = ((payload[0].value as number / total) * 100).toFixed(1);
       return (
-        <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-          <p className="text-sm font-medium">{payload[0].payload.label}</p>
-          <p className="text-sm text-violet-600 font-semibold">
+        <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-sm">
+          <p className="text-sm font-medium text-slate-900 dark:text-slate-100">{payload[0].payload.label}</p>
+          <p className="text-sm text-violet-600 dark:text-violet-400 font-semibold">
             {formatCurrency(payload[0].value as number)}
           </p>
-          <p className="text-xs text-slate-600">{percentage}%</p>
+          <p className="text-xs text-slate-600 dark:text-slate-400">{percentage}%</p>
         </div>
       );
     }
@@ -112,7 +112,7 @@ export function CategoryAnalysis({
               height={36}
               formatter={(value, entry) => {
                 const categoryData = entry.payload as unknown as CategoryData;
-                return <span className="text-sm text-slate-900 font-medium">{categoryData.label}</span>;
+                return <span className="text-sm text-slate-900 dark:text-slate-100 font-medium">{categoryData.label}</span>;
               }}
             />
           </PieChart>

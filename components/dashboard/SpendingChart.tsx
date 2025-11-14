@@ -14,6 +14,7 @@ import {
 } from "recharts";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { formatCurrency } from "@/lib/utils";
+import { useTheme } from "next-themes";
 
 interface SpendingDataPoint {
   date: string;
@@ -31,9 +32,11 @@ interface SpendingChartProps {
 function CustomTooltip({ active, payload }: TooltipProps<number, string>) {
   if (active && payload && payload.length) {
     return (
-      <div className="rounded-lg border border-slate-200 bg-white p-3 shadow-sm">
-        <p className="text-sm font-medium">{payload[0].payload.label || payload[0].payload.date}</p>
-        <p className="text-sm text-violet-600 font-semibold">
+      <div className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 p-3 shadow-sm">
+        <p className="text-sm font-medium text-slate-900 dark:text-slate-100">
+          {payload[0].payload.label || payload[0].payload.date}
+        </p>
+        <p className="text-sm text-violet-600 dark:text-violet-400 font-semibold">
           {formatCurrency(payload[0].value as number)}
         </p>
       </div>
@@ -47,6 +50,16 @@ export function SpendingChart({
   title = "소비 추이",
   type = "line",
 }: SpendingChartProps) {
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
+
+  // Dynamic colors based on theme
+  const colors = {
+    grid: isDark ? "#334155" : "#e2e8f0", // slate-700 : slate-200
+    text: isDark ? "#e2e8f0" : "#1e293b", // slate-200 : slate-800
+    axis: isDark ? "#64748b" : "#94a3b8", // slate-500 : slate-400
+    primary: isDark ? "#8b5cf6" : "#7c3aed", // violet-500 : violet-600
+  };
 
   return (
     <Card>
@@ -57,42 +70,42 @@ export function SpendingChart({
         <ResponsiveContainer width="100%" height={300}>
           {type === "line" ? (
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 12, fill: "#1e293b" }}
-                stroke="#94a3b8"
+                tick={{ fontSize: 12, fill: colors.text }}
+                stroke={colors.axis}
               />
               <YAxis
-                tick={{ fontSize: 12, fill: "#1e293b" }}
-                stroke="#94a3b8"
+                tick={{ fontSize: 12, fill: colors.text }}
+                stroke={colors.axis}
                 tickFormatter={(value) => `${Math.floor(value / 1000)}K`}
               />
               <Tooltip content={<CustomTooltip />} />
               <Line
                 type="monotone"
                 dataKey="amount"
-                stroke="#7c3aed"
+                stroke={colors.primary}
                 strokeWidth={2}
-                dot={{ fill: "#7c3aed", r: 4 }}
+                dot={{ fill: colors.primary, r: 4 }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>
           ) : (
             <BarChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+              <CartesianGrid strokeDasharray="3 3" stroke={colors.grid} />
               <XAxis
                 dataKey="label"
-                tick={{ fontSize: 12, fill: "#1e293b" }}
-                stroke="#94a3b8"
+                tick={{ fontSize: 12, fill: colors.text }}
+                stroke={colors.axis}
               />
               <YAxis
-                tick={{ fontSize: 12, fill: "#1e293b" }}
-                stroke="#94a3b8"
+                tick={{ fontSize: 12, fill: colors.text }}
+                stroke={colors.axis}
                 tickFormatter={(value) => `${Math.floor(value / 1000)}K`}
               />
               <Tooltip content={<CustomTooltip />} />
-              <Bar dataKey="amount" fill="#7c3aed" radius={[8, 8, 0, 0]} />
+              <Bar dataKey="amount" fill={colors.primary} radius={[8, 8, 0, 0]} />
             </BarChart>
           )}
         </ResponsiveContainer>
