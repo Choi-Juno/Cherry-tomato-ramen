@@ -181,3 +181,159 @@ Now begin with PHASE 1, step 1:
 ```
 
 # 2nd 기능 추가 프롬프트
+## 다크모드
+```
+You are a senior frontend engineer and design systems expert.
+
+Context:
+- Tech stack:
+  - Next.js (App Router)
+  - React
+  - TypeScript
+  - TailwindCSS
+  - Some shadcn/ui-like primitives (tooltip, popover, card, skeleton, etc.)
+- The app includes components such as:
+  - Dashboard
+  - ExpenseInput
+  - AIInsights
+  - CategoryAnalysis
+  - SpendingChart
+  - RecentTransactions
+  - BudgetSetting
+  - Settings
+
+IMPORTANT:
+- Dark mode is ALREADY PARTIALLY IMPLEMENTED.
+- However, some colors are wrong or inconsistent:
+  - Certain backgrounds are too bright or too dark in dark mode.
+  - Some text is low-contrast or invisible on dark backgrounds.
+  - Some components still use hard-coded colors (#fff, #000, etc.) instead of theme tokens.
+- Your job is NOT just to add dark mode from scratch.
+- Your job is to:
+  1) AUDIT the existing color system and dark mode behavior,
+  2) FIX broken or inconsistent colors,
+  3) STABILIZE the light/dark theme so it looks polished.
+
+====================================================
+[Goals]
+
+1) Use Tailwind `darkMode: "class"` (or confirm it is already configured correctly).
+2) Build or refine a semantic color system with CSS variables, such as:
+   - bg-background, bg-card, bg-muted
+   - text-foreground, text-muted
+   - border-border
+   - accent, accent-foreground
+3) Ensure both light and dark themes are:
+   - Visually consistent across all pages
+   - Readable (WCAG-compliant contrast, or at least reasonable)
+   - Free of hard-coded, mode-breaking colors.
+
+====================================================
+[What you MUST pay special attention to]
+
+You MUST carefully inspect and adjust:
+
+1) Tailwind & global styles:
+   - `tailwind.config.(js|ts)`
+   - `globals.css` (or equivalent)
+   - `index.css` or other global styles
+   - Any CSS variables under :root and .dark selectors
+
+2) Components with likely color bugs:
+   - Dashboard layout (background + nested cards)
+   - AIInsights (insight cards, severity badges, etc.)
+   - SpendingChart (chart grid, axis labels, tooltip colors)
+   - CategoryAnalysis (chips, legends, badges)
+   - RecentTransactions (table rows, hover states)
+   - BudgetSetting (progress bars, warnings)
+   - Settings (form fields, toggles, section titles)
+
+3) Problem patterns to find and fix:
+   - Hard-coded colors like:
+     - `#fff`, `#ffffff`, `#000`, `#000000`
+     - direct Tailwind colors not mapped to semantic tokens (e.g., `bg-white`, `bg-black`, some `bg-slate-xxx`)
+   - Inline styles that conflict with theme.
+   - Components that look fine in light mode but break visually in dark mode.
+
+====================================================
+[Step-by-step tasks]
+
+Follow these steps in order. Use “Let’s think step by step” internally.
+
+STEP 1 — Analyze Existing Theme
+- Examine tailwind.config and global CSS.
+- Identify:
+  - How dark mode is currently triggered (class vs media).
+  - What CSS variables (if any) are defined for colors.
+  - Where light/dark variants are currently set.
+
+STEP 2 — Define or Refine Semantic Tokens
+- Propose a minimal, semantic color token set, for example:
+  - `--background`, `--foreground`
+  - `--card`, `--card-foreground`
+  - `--muted`, `--muted-foreground`
+  - `--border`
+  - `--accent`, `--accent-foreground`
+  - `--destructive`, `--destructive-foreground`
+- Define values for both `:root` (light) and `.dark` (dark).
+- Ensure the palette is consistent with a modern, slightly neutral style (suitable for a finance dashboard).
+
+STEP 3 — Tailwind Integration
+- Update tailwind.config to map Tailwind utilities to the CSS variables, e.g.:
+  - `background: "hsl(var(--background))"`
+  - `foreground: "hsl(var(--foreground))"`
+- Show the updated config snippet.
+
+STEP 4 — Audit & Fix Components
+- For each of the key components:
+  - Dashboard
+  - AIInsights
+  - SpendingChart
+  - CategoryAnalysis
+  - RecentTransactions
+  - BudgetSetting
+  - Settings
+- Do the following:
+  1) Identify ANY hard-coded or suspicious color usages.
+  2) Replace them with semantic classes (e.g., `bg-background`, `bg-card`, `text-muted-foreground`).
+  3) Ensure hover/focus/active states have appropriate contrast in both light and dark mode.
+  4) For charts and special visuals, propose a light/dark friendly color set.
+
+- Provide concrete before/after examples when you fix a color:
+  - Show the old code snippet.
+  - Show the improved code snippet.
+  - Explain why the new version works better in dark mode.
+
+STEP 5 — Theme Toggle Component
+- Implement a reusable `<ThemeToggle />` component that:
+  - Supports "light", "dark", and "system" modes.
+  - Uses `prefers-color-scheme` for system mode.
+  - Persists user choice in `localStorage` (e.g., `theme = "light" | "dark" | "system"`).
+  - Safely updates the `class` on `<html>` to avoid hydration issues.
+
+- Integrate the toggle into:
+  - Main layout header, and/or
+  - Settings page.
+
+STEP 6 — Visual Sanity Check & Guidelines
+- Provide guidance for future components:
+  - Which classes to use for surface backgrounds, cards, text, etc.
+  - Example patterns:
+    - Page background: `bg-background text-foreground`
+    - Card: `bg-card text-card-foreground border-border`
+    - Muted sections: `bg-muted text-muted-foreground`
+    - Warnings: `bg-destructive/10 text-destructive border-destructive/30`
+- Explain common pitfalls in dark mode and how to avoid them.
+
+====================================================
+[Output Format]
+
+- Use clear headings for each step.
+- Show updated Tailwind config.
+- Show CSS variable definitions for light/dark.
+- Show representative component refactors (Dashboard, AIInsights, etc.).
+- Explain the reasoning behind color choices and fixes.
+
+Be extra careful to NOT simply overwrite everything blindly.
+Instead, audit → reason → fix, especially where current colors are broken or unreadable in dark mode.
+```

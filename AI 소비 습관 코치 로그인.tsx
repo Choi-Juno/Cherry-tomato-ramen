@@ -1,19 +1,79 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Wallet, TrendingDown, Target, PiggyBank, CreditCard, BarChart3 } from 'lucide-react';
 
+// Type definitions
+interface UserData {
+  email: string;
+  name: string;
+  loginMethod: string;
+}
+
+interface RegisteredUser {
+  email: string;
+  password: string;
+  name: string;
+}
+
+interface LoginScreenProps {
+  onLogin: (userData: UserData) => void;
+  onSignup: () => void;
+  onForgotPassword?: () => void;
+  registeredUsers: RegisteredUser[];
+}
+
+interface SignupScreenProps {
+  onBack: () => void;
+  onSignup: (userData: UserData) => void;
+  onRegister: (userData: RegisteredUser) => void;
+}
+
+interface DashboardProps {
+  user: UserData;
+  onLogout: () => void;
+}
+
+interface StatCardProps {
+  icon: React.ReactNode;
+  title: string;
+  value: string;
+  change: string;
+  positive: boolean | null;
+}
+
+interface CategoryBarProps {
+  label: string;
+  amount: string;
+  percentage: number;
+  color: string;
+}
+
+interface RecommendationCardProps {
+  title: string;
+  description: string;
+  type: 'warning' | 'success' | 'info';
+}
+
+interface TransactionItemProps {
+  icon: string;
+  title: string;
+  date: string;
+  amount: string;
+  category: string;
+}
+
 export default function App() {
   const [currentScreen, setCurrentScreen] = useState('login');
-  const [user, setUser] = useState(null);
-  const [registeredUsers, setRegisteredUsers] = useState([
+  const [user, setUser] = useState<UserData | null>(null);
+  const [registeredUsers, setRegisteredUsers] = useState<RegisteredUser[]>([
     { email: 'test@test.com', password: '12345678', name: '테스트 유저' }
   ]);
 
-  const handleLogin = (userData) => {
+  const handleLogin = (userData: UserData) => {
     setUser(userData);
     setCurrentScreen('dashboard');
   };
 
-  const handleRegister = (userData) => {
+  const handleRegister = (userData: RegisteredUser) => {
     setRegisteredUsers([...registeredUsers, userData]);
   };
 
@@ -33,7 +93,7 @@ export default function App() {
   return <LoginScreen onLogin={handleLogin} onSignup={() => setCurrentScreen('signup')} registeredUsers={registeredUsers} />;
 }
 
-function LoginScreen({ onLogin, onSignup, onForgotPassword, registeredUsers }) {
+function LoginScreen({ onLogin, onSignup, onForgotPassword, registeredUsers }: LoginScreenProps) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -168,7 +228,7 @@ function LoginScreen({ onLogin, onSignup, onForgotPassword, registeredUsers }) {
   );
 }
 
-function SignupScreen({ onBack, onSignup, onRegister }) {
+function SignupScreen({ onBack, onSignup, onRegister }: SignupScreenProps) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -353,7 +413,7 @@ function SignupScreen({ onBack, onSignup, onRegister }) {
   );
 }
 
-function Dashboard({ user, onLogout }) {
+function Dashboard({ user, onLogout }: DashboardProps) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
 
   const confirmLogout = () => {
@@ -510,7 +570,7 @@ function Dashboard({ user, onLogout }) {
   );
 }
 
-function StatCard({ icon, title, value, change, positive }) {
+function StatCard({ icon, title, value, change, positive }: StatCardProps) {
   return (
     <div className="bg-white rounded-xl p-6 shadow-sm">
       <div className="flex items-center justify-between mb-4">
@@ -532,7 +592,7 @@ function StatCard({ icon, title, value, change, positive }) {
   );
 }
 
-function CategoryBar({ label, amount, percentage, color }) {
+function CategoryBar({ label, amount, percentage, color }: CategoryBarProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-2">
@@ -549,7 +609,7 @@ function CategoryBar({ label, amount, percentage, color }) {
   );
 }
 
-function RecommendationCard({ title, description, type }) {
+function RecommendationCard({ title, description, type }: RecommendationCardProps) {
   const bgColor = {
     warning: 'bg-yellow-50 border-yellow-200',
     success: 'bg-green-50 border-green-200',
@@ -570,7 +630,7 @@ function RecommendationCard({ title, description, type }) {
   );
 }
 
-function TransactionItem({ icon, title, date, amount, category }) {
+function TransactionItem({ icon, title, date, amount, category }: TransactionItemProps) {
   return (
     <div className="flex items-center justify-between py-3 border-b border-gray-100 last:border-0">
       <div className="flex items-center gap-3">
