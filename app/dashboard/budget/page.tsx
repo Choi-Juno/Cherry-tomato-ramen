@@ -1,6 +1,6 @@
 "use client";
 
-// Force dynamic rendering - don't prerender at build time
+// Force dynamic rendering
 export const dynamic = 'force-dynamic';
 
 import { useState, useMemo } from "react";
@@ -14,6 +14,7 @@ import { TransactionCategory } from "@/types/transaction";
 import { Edit2, Check, X } from "lucide-react";
 import { useTransactionsStore } from "@/lib/store/transactions-store";
 import { useToast } from "@/components/ui/toast";
+import { useBudget } from "@/lib/hooks/useBudget";
 
 const CATEGORY_LABELS: Record<TransactionCategory, string> = {
   food: "식비",
@@ -32,75 +33,42 @@ interface BudgetItem {
   spent: number;
 }
 
-// 초기 예산 설정 (로컬 스토리지에서 불러오거나 기본값 사용)
-const getInitialBudgets = (): Record<TransactionCategory, number> => {
-  if (typeof window === "undefined") return DEFAULT_BUDGETS;
-  
-  const saved = localStorage.getItem("category-budgets");
-  if (saved) {
-    try {
-      return JSON.parse(saved);
-    } catch {
-      return DEFAULT_BUDGETS;
-    }
-  }
-  return DEFAULT_BUDGETS;
-};
-
-const DEFAULT_BUDGETS: Record<TransactionCategory, number> = {
-  food: 300000,
-  transport: 100000,
-  shopping: 150000,
-  entertainment: 100000,
-  education: 50000,
-  health: 30000,
-  utilities: 50000,
-  other: 20000,
-};
-
 export default function BudgetPage() {
   const { transactions } = useTransactionsStore();
+  const { budgets, totalBudget, setBudget, loading: budgetLoading } = useBudget();
   const { addToast } = useToast();
   
-  const [categoryBudgets, setCategoryBudgets] = useState<Record<TransactionCategory, number>>(getInitialBudgets());
   const [editingId, setEditingId] = useState<TransactionCategory | null>(null);
   const [tempValue, setTempValue] = useState("");
 
   // 카테고리별 실제 지출 계산 (현재 월)
   const categorySpending = useMemo(() => {
-    const spending: Record<TransactionCategory, number> = {
-      food: 0,
-      transport: 0,
-      shopping: 0,
-      entertainment: 0,
-      education: 0,
-      health: 0,
-      utilities: 0,
-      other: 0,
-    };
-
+    const spending: Record<string, number> = {};
     const currentMonth = new Date().toISOString().slice(0, 7);
 
     transactions.forEach((t) => {
       if (t.date.startsWith(currentMonth)) {
-        spending[t.category] += t.amount;
+        spending[t.category] = (spending[t.category] || 0) + t.amount;
       }
     });
 
     return spending;
   }, [transactions]);
 
-  // BudgetItem 배열 생성
-  const budgets: BudgetItem[] = useMemo(() => {
-    return Object.entries(CATEGORY_LABELS).map(([category]) => ({
-      category: category as TransactionCategory,
-      budget: categoryBudgets[category as TransactionCategory],
-      spent: categorySpending[category as TransactionCategory],
-    }));
-  }, [categoryBudgets, categorySpending]);
+  // BudgetItem 배열 생성 (Supabase 데이터 기반)
+  const budgetItems: BudgetItem[] = useMemo(() => {
+    return Object.keys(CATEGORY_LABELS).map((key) => {
+      const category = key as TransactionCategory;
+      const budgetItem = budgets.find((b) => b.category === category);
+      return {
+        category,
+        budget: budgetItem ? budgetItem.amount : 0,
+        spent: categorySpending[category] || 0,
+      };
+    });
+  }, [budgets, categorySpending]);
 
-  const totalBudget = useMemo(() => budgets.reduce((sum, item) => sum + item.budget, 0), [budgets]);
-  const totalSpent = useMemo(() => budgets.reduce((sum, item) => sum + item.spent, 0), [budgets]);
+  const totalSpent = useMemo(() => budgetItems.reduce((sum, item) => sum + item.spent, 0), [budgetItems]);
   const totalRemaining = totalBudget - totalSpent;
 
   const handleEdit = (category: TransactionCategory, currentBudget: number) => {
@@ -108,29 +76,31 @@ export default function BudgetPage() {
     setTempValue(currentBudget.toString());
   };
 
-  const handleSave = (category: TransactionCategory) => {
+  const handleSave = async (category: TransactionCategory) => {
     const newBudget = parseInt(tempValue) || 0;
     
-    const updatedBudgets = {
-      ...categoryBudgets,
-      [category]: newBudget,
-    };
-    
-    setCategoryBudgets(updatedBudgets);
-    
-    // 로컬 스토리지에 저장
-    if (typeof window !== "undefined") {
-      localStorage.setItem("category-budgets", JSON.stringify(updatedBudgets));
+    try {
+      await setBudget({
+        category,
+        amount: newBudget,
+        month: new Date().toISOString().slice(0, 7),
+      });
+      
+      setEditingId(null);
+      setTempValue("");
+      
+      addToast({
+        title: "예산 설정 완료",
+        description: `${CATEGORY_LABELS[category]} 예산이 ${formatCurrency(newBudget)}로 설정되었습니다.`,
+        variant: "success",
+      });
+    } catch (error) {
+      addToast({
+        title: "설정 실패",
+        description: "예산 저장 중 오류가 발생했습니다.",
+        variant: "error",
+      });
     }
-    
-    setEditingId(null);
-    setTempValue("");
-    
-    addToast({
-      title: "예산 설정 완료",
-      description: `${CATEGORY_LABELS[category]} 예산이 ${formatCurrency(newBudget)}로 설정되었습니다.`,
-      variant: "success",
-    });
   };
 
   const handleCancel = () => {
@@ -145,6 +115,10 @@ export default function BudgetPage() {
     if (percentage >= 80) return { color: "bg-amber-500", severity: "warning" };
     return { color: "bg-emerald-500", severity: "success" };
   };
+
+  if (budgetLoading) {
+    return <div className="p-8 text-center">로딩 중...</div>;
+  }
 
   return (
     <div className="space-y-5">
@@ -205,13 +179,13 @@ export default function BudgetPage() {
         </CardHeader>
         <CardContent className="p-4 pt-0">
           <div className="space-y-5">
-            {budgets.map((item) => {
+            {budgetItems.map((item) => {
               const percentage =
                 item.budget > 0 ? (item.spent / item.budget) * 100 : 0;
               const status = getBudgetStatus(item.spent, item.budget);
               const isEditing = editingId === item.category;
 
-              const categoryIcons: Record<TransactionCategory, string> = {
+              const categoryIcons: Record<string, string> = {
                 food: "🍽️",
                 transport: "🚗",
                 shopping: "🛍️",
@@ -228,7 +202,7 @@ export default function BudgetPage() {
                     <div className="flex items-center gap-3 flex-1">
                       <div className="h-10 w-10 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 dark:from-violet-900 dark:to-purple-900 flex items-center justify-center flex-shrink-0 shadow-sm">
                         <span className="text-lg">
-                          {categoryIcons[item.category]}
+                          {categoryIcons[item.category] || "📦"}
                         </span>
                       </div>
                       <div className="flex-1 min-w-0">
@@ -240,7 +214,7 @@ export default function BudgetPage() {
                             <Badge variant="destructive" className="text-[9px] px-1.5 py-0">초과</Badge>
                           )}
                           {status.severity === "warning" && (
-                            <Badge variant="warning" className="text-[9px] px-1.5 py-0">주의</Badge>
+                            <Badge className="bg-amber-500 text-white hover:bg-amber-600 text-[9px] px-1.5 py-0">주의</Badge>
                           )}
                         </div>
                         <p className="text-xs text-slate-500 dark:text-slate-400">
@@ -319,4 +293,3 @@ export default function BudgetPage() {
     </div>
   );
 }
-

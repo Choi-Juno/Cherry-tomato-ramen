@@ -17,19 +17,26 @@ export function useBudget(month?: string) {
   const fetchBudgets = useCallback(async () => {
     try {
       setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) return;
+
       const { data, error } = await supabase
         .from("budgets")
         .select("*")
+        .eq("user_id", user.id)
         .eq("month", targetMonth);
 
       if (error) throw error;
       setBudgets(data as Budget[]);
     } catch (err) {
+      console.error("Error fetching budgets:", err);
       setError(err as Error);
     } finally {
       setLoading(false);
     }
   }, [targetMonth, supabase]);
+
+  const totalBudget = budgets.reduce((sum, item) => sum + item.amount, 0);
 
   const setBudget = async (input: CreateBudgetInput) => {
     try {
@@ -87,6 +94,7 @@ export function useBudget(month?: string) {
 
   return {
     budgets,
+    totalBudget,
     loading,
     error,
     refetch: fetchBudgets,

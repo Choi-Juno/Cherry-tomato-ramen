@@ -4,14 +4,15 @@
 export const dynamic = "force-dynamic";
 
 import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
-import { SpendingChart } from "@/components/dashboard/SpendingChart";
-import { CategoryAnalysis } from "@/components/dashboard/CategoryAnalysis";
+import { SpendingOverview } from "@/components/dashboard/SpendingOverview";
 import { AIInsightCard } from "@/components/insights/AIInsightCard";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatShortDate } from "@/lib/utils";
 import { AIInsight } from "@/types/insight";
 import { useTransactionsStore } from "@/lib/store/transactions-store";
+import { useBudget } from "@/lib/hooks/useBudget";
 import { useMemo, useState, useEffect } from "react";
 import { mlApiClient } from "@/lib/ml/client";
 import { createClient } from "@/lib/supabase/client";
@@ -29,21 +30,39 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function DashboardPage() {
     const { transactions } = useTransactionsStore();
+    const { totalBudget } = useBudget(); // useBudget hook for single source of truth
     const supabase = createClient();
 
     // AI Insights 상태
     const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
     const [isLoadingInsights, setIsLoadingInsights] = useState(false);
     const [insightsError, setInsightsError] = useState<string | null>(null);
+    const [insightTab, setInsightTab] = useState("all");
 
     // 실시간 총 지출 계산
     const totalSpent = useMemo(() => {
         return transactions.reduce((sum, t) => sum + t.amount, 0);
     }, [transactions]);
 
-    // 월 예산 (나중에 설정 기능 추가 예정)
-    const monthlyBudget = 700000;
-    const budgetRemaining = monthlyBudget - totalSpent;
+    // 남은 예산 계산
+    // If totalBudget is 0 (not set), remaining is negative totalSpent (or just show 0/unset logic in UI)
+    const budgetRemaining = totalBudget > 0 ? totalBudget - totalSpent : -totalSpent;
+
+    // Filtered Insights
+    const filteredInsights = useMemo(() => {
+        return aiInsights.filter((insight) => {
+            if (insightTab === "all") return true;
+            if (insightTab === "savings") return insight.type === "savings_opportunity";
+            if (insightTab === "warnings") {
+                return (
+                    ["overspending", "category_warning"].includes(insight.type) ||
+                    insight.severity === "warning" ||
+                    insight.severity === "critical"
+                );
+            }
+            return true;
+        });
+    }, [aiInsights, insightTab]);
 
     // ML API에서 AI 인사이트 가져오기
     useEffect(() => {
@@ -66,7 +85,7 @@ export default function DashboardPage() {
                     throw new Error("User not authenticated");
                 }
 
-                // 예산 데이터 준비 (카테고리별)
+                // 예산 데이터 준비 (카테고리별) - TODO: Pass actual budget data if available
                 const currentMonthBudget = {
                     food: 300000,
                     transport: 100000,
@@ -134,60 +153,6 @@ export default function DashboardPage() {
         fetchInsights();
     }, [transactions, supabase]);
 
-    // 카테고리별 지출 계산
-    const categoryData = useMemo(() => {
-        const categoryTotals: Record<string, number> = {};
-
-        transactions.forEach((t) => {
-            if (!categoryTotals[t.category]) {
-                categoryTotals[t.category] = 0;
-            }
-            categoryTotals[t.category] += t.amount;
-        });
-
-        return Object.entries(categoryTotals).map(([category, amount]) => ({
-            category,
-            amount,
-            label: CATEGORY_LABELS[category] || category,
-        }));
-    }, [transactions]);
-
-    // 주간 트렌드 계산 (최근 5주)
-    const weeklyTrend = useMemo(() => {
-        const weeks: Record<string, number> = {};
-        const now = new Date();
-
-        transactions.forEach((t) => {
-            const transDate = new Date(t.date);
-            const diffTime = now.getTime() - transDate.getTime();
-            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-            const weekNumber = Math.floor(diffDays / 7);
-
-            if (weekNumber < 5) {
-                const weekKey = `week${weekNumber}`;
-                if (!weeks[weekKey]) {
-                    weeks[weekKey] = 0;
-                }
-                weeks[weekKey] += t.amount;
-            }
-        });
-
-        // 최근 5주 데이터 생성
-        const trendData = [];
-        for (let i = 4; i >= 0; i--) {
-            const weekKey = `week${i}`;
-            trendData.push({
-                date: new Date(now.getTime() - i * 7 * 24 * 60 * 60 * 1000)
-                    .toISOString()
-                    .split("T")[0],
-                amount: weeks[weekKey] || 0,
-                label: i === 0 ? "이번 주" : `${i}주 전`,
-            });
-        }
-
-        return trendData;
-    }, [transactions]);
-
     // Get recent transactions (최근 5개)
     const recentTransactions = useMemo(() => {
         return transactions.slice(0, 5);
@@ -225,36 +190,20 @@ export default function DashboardPage() {
                 </p>
             </div>
 
-            {/* Spending Summary Cards - 실시간 데이터 */}
+            {/* Spending Summary Cards - 실시간 데이터 + 예산 연동 */}
             <SpendingSummary
                 totalSpent={totalSpent}
                 budgetRemaining={budgetRemaining}
-                monthlyBudget={monthlyBudget}
-                percentageChange={12.5} // TODO: 이전 달 대비 계산
+                monthlyBudget={totalBudget}
+                percentageChange={0} // TODO: 이전 달 대비 계산 로직 추가 필요
             />
 
-            {/* Charts Section - 실시간 데이터 */}
+            {/* Unified Spending Overview (Trend + Category) */}
             <div className="space-y-4">
-                <SpendingChart
-                    data={weeklyTrend}
-                    title="주간 소비 추이"
-                    type="bar"
-                />
-                {categoryData.length > 0 ? (
-                    <CategoryAnalysis data={categoryData} />
-                ) : (
-                    <Card>
-                        <CardContent className="p-12 text-center">
-                            <div className="text-4xl mb-3">📊</div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                                지출을 추가하면 카테고리별 분석이 표시됩니다
-                            </p>
-                        </CardContent>
-                    </Card>
-                )}
+                <SpendingOverview transactions={transactions} />
             </div>
 
-            {/* AI Insights Section */}
+            {/* AI Insights Section with Tabs */}
             <section>
                 <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2">
@@ -269,6 +218,15 @@ export default function DashboardPage() {
                         </Badge>
                     </div>
                 </div>
+
+                {/* Insight Tabs */}
+                <Tabs value={insightTab} onValueChange={setInsightTab} className="w-full mb-3">
+                    <TabsList className="grid w-full grid-cols-3">
+                        <TabsTrigger value="all">전체</TabsTrigger>
+                        <TabsTrigger value="savings">절약 가능</TabsTrigger>
+                        <TabsTrigger value="warnings">주의 항목</TabsTrigger>
+                    </TabsList>
+                </Tabs>
 
                 {isLoadingInsights ? (
                     <Card>
@@ -288,23 +246,29 @@ export default function DashboardPage() {
                             </p>
                         </CardContent>
                     </Card>
-                ) : aiInsights.length === 0 ? (
+                ) : filteredInsights.length === 0 ? (
                     <Card>
                         <CardContent className="p-12 text-center">
-                            <div className="text-4xl mb-3">💡</div>
+                            <div className="text-4xl mb-3">
+                                {insightTab === "all" ? "💡" : insightTab === "savings" ? "💰" : "✅"}
+                            </div>
                             <p className="text-sm text-slate-600 dark:text-slate-400">
-                                {transactions.length === 0
-                                    ? "지출 내역을 추가하면 AI가 인사이트를 제공합니다"
-                                    : "현재 특별한 인사이트가 없습니다. 계속 현명한 소비를 하세요!"}
+                                {insightTab === "all"
+                                    ? (transactions.length === 0
+                                        ? "지출 내역을 추가하면 AI가 인사이트를 제공합니다"
+                                        : "현재 특별한 인사이트가 없습니다.")
+                                    : insightTab === "savings"
+                                    ? "절약 가능한 항목이 없습니다."
+                                    : "주의할 만한 지출 내역이 없습니다."}
                             </p>
                         </CardContent>
                     </Card>
                 ) : (
                     <div className="space-y-3">
-                        {aiInsights.slice(0, 3).map((insight) => (
+                        {filteredInsights.slice(0, 3).map((insight) => (
                             <AIInsightCard key={insight.id} insight={insight} />
                         ))}
-                        {aiInsights.length > 3 && (
+                        {filteredInsights.length > 3 && (
                             <a
                                 href="/dashboard/insights"
                                 className="block text-center py-3 text-sm font-semibold text-violet-600 hover:text-violet-700 active:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
@@ -316,7 +280,7 @@ export default function DashboardPage() {
                 )}
             </section>
 
-            {/* Recent Transactions - 실제 데이터 사용 */}
+            {/* Recent Transactions */}
             <section>
                 <div className="flex items-center justify-between mb-3">
                     <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">

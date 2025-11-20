@@ -15,7 +15,7 @@ export function SpendingSummary({
   monthlyBudget,
   percentageChange,
 }: SpendingSummaryProps) {
-  const budgetUsedPercentage = (totalSpent / monthlyBudget) * 100;
+  const budgetUsedPercentage = monthlyBudget > 0 ? (totalSpent / monthlyBudget) * 100 : 0;
   const isOverBudget = budgetUsedPercentage > 100;
 
   return (
