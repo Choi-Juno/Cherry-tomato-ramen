@@ -5,10 +5,8 @@ export const dynamic = "force-dynamic";
 
 import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
 import { SpendingOverview } from "@/components/dashboard/SpendingOverview";
-import { AIInsightCard } from "@/components/insights/AIInsightCard";
+import { DashboardAIInsights } from "@/components/dashboard/DashboardAIInsights";
 import { Card, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatCurrency, formatShortDate } from "@/lib/utils";
 import { AIInsight } from "@/types/insight";
 import { useTransactionsStore } from "@/lib/store/transactions-store";
@@ -30,14 +28,13 @@ const CATEGORY_LABELS: Record<string, string> = {
 
 export default function DashboardPage() {
     const { transactions } = useTransactionsStore();
-    const { totalBudget } = useBudget(); // useBudget hook for single source of truth
+    const { totalBudget, loading: budgetLoading } = useBudget(); // useBudget hook for single source of truth
     const supabase = createClient();
 
     // AI Insights 상태
     const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
     const [isLoadingInsights, setIsLoadingInsights] = useState(false);
     const [insightsError, setInsightsError] = useState<string | null>(null);
-    const [insightTab, setInsightTab] = useState("all");
 
     // 실시간 총 지출 계산
     const totalSpent = useMemo(() => {
@@ -45,24 +42,7 @@ export default function DashboardPage() {
     }, [transactions]);
 
     // 남은 예산 계산
-    // If totalBudget is 0 (not set), remaining is negative totalSpent (or just show 0/unset logic in UI)
     const budgetRemaining = totalBudget > 0 ? totalBudget - totalSpent : -totalSpent;
-
-    // Filtered Insights
-    const filteredInsights = useMemo(() => {
-        return aiInsights.filter((insight) => {
-            if (insightTab === "all") return true;
-            if (insightTab === "savings") return insight.type === "savings_opportunity";
-            if (insightTab === "warnings") {
-                return (
-                    ["overspending", "category_warning"].includes(insight.type) ||
-                    insight.severity === "warning" ||
-                    insight.severity === "critical"
-                );
-            }
-            return true;
-        });
-    }, [aiInsights, insightTab]);
 
     // ML API에서 AI 인사이트 가져오기
     useEffect(() => {
@@ -203,81 +183,19 @@ export default function DashboardPage() {
                 <SpendingOverview transactions={transactions} />
             </div>
 
-            {/* AI Insights Section with Tabs */}
+            {/* AI Insights Section (Summary Only) */}
             <section>
                 <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-2">
-                        <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
-                            AI 인사이트
-                        </h2>
-                        <Badge
-                            variant="default"
-                            className="text-[10px] px-2 py-0.5"
-                        >
-                            AI
-                        </Badge>
-                    </div>
+                    <h2 className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                        AI 인사이트
+                    </h2>
                 </div>
-
-                {/* Insight Tabs */}
-                <Tabs value={insightTab} onValueChange={setInsightTab} className="w-full mb-3">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="all">전체</TabsTrigger>
-                        <TabsTrigger value="savings">절약 가능</TabsTrigger>
-                        <TabsTrigger value="warnings">주의 항목</TabsTrigger>
-                    </TabsList>
-                </Tabs>
-
-                {isLoadingInsights ? (
-                    <Card>
-                        <CardContent className="p-12 text-center">
-                            <div className="text-4xl mb-3">🤖</div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                                AI가 당신의 소비 패턴을 분석하고 있습니다...
-                            </p>
-                        </CardContent>
-                    </Card>
-                ) : insightsError ? (
-                    <Card className="border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950">
-                        <CardContent className="p-6 text-center">
-                            <div className="text-3xl mb-2">⚠️</div>
-                            <p className="text-sm text-red-700 dark:text-red-300">
-                                {insightsError}
-                            </p>
-                        </CardContent>
-                    </Card>
-                ) : filteredInsights.length === 0 ? (
-                    <Card>
-                        <CardContent className="p-12 text-center">
-                            <div className="text-4xl mb-3">
-                                {insightTab === "all" ? "💡" : insightTab === "savings" ? "💰" : "✅"}
-                            </div>
-                            <p className="text-sm text-slate-600 dark:text-slate-400">
-                                {insightTab === "all"
-                                    ? (transactions.length === 0
-                                        ? "지출 내역을 추가하면 AI가 인사이트를 제공합니다"
-                                        : "현재 특별한 인사이트가 없습니다.")
-                                    : insightTab === "savings"
-                                    ? "절약 가능한 항목이 없습니다."
-                                    : "주의할 만한 지출 내역이 없습니다."}
-                            </p>
-                        </CardContent>
-                    </Card>
-                ) : (
-                    <div className="space-y-3">
-                        {filteredInsights.slice(0, 3).map((insight) => (
-                            <AIInsightCard key={insight.id} insight={insight} />
-                        ))}
-                        {filteredInsights.length > 3 && (
-                            <a
-                                href="/dashboard/insights"
-                                className="block text-center py-3 text-sm font-semibold text-violet-600 hover:text-violet-700 active:text-violet-800 dark:text-violet-400 dark:hover:text-violet-300"
-                            >
-                                전체 인사이트 보기 ({aiInsights.length}개) →
-                            </a>
-                        )}
-                    </div>
-                )}
+                
+                <DashboardAIInsights 
+                    insights={aiInsights} 
+                    isLoading={isLoadingInsights} 
+                    error={insightsError} 
+                />
             </section>
 
             {/* Recent Transactions */}

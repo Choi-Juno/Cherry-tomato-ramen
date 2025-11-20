@@ -1,6 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, TrendingDown, DollarSign } from "lucide-react";
+import { TrendingUp, TrendingDown, DollarSign, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface SpendingSummaryProps {
   totalSpent: number;
@@ -21,36 +23,51 @@ export function SpendingSummary({
   return (
     <div className="space-y-3">
       {/* Main Summary Card */}
-      <Card className="overflow-hidden shadow-md bg-gradient-to-br from-violet-500 to-purple-600">
+      <Card className="overflow-hidden shadow-md bg-gradient-to-br from-violet-500 to-purple-600 dark:from-violet-600 dark:to-purple-700 border-none">
         <CardContent className="p-5">
           <div className="text-white">
-            <p className="text-xs font-medium text-violet-100 mb-1">이번 달 총 지출</p>
+            <div className="flex items-center justify-between mb-1">
+              <p className="text-xs font-medium text-violet-100">이번 달 총 지출</p>
+            </div>
             <div className="flex items-end justify-between">
               <div>
                 <p className="text-3xl font-bold mb-2">
                   {formatCurrency(totalSpent)}
                 </p>
-                <div className="flex items-center gap-1">
-                  {percentageChange > 0 ? (
-                    <>
-                      <TrendingUp className="h-3.5 w-3.5" />
-                      <span className="text-xs font-medium">
-                        +{percentageChange.toFixed(1)}%
-                      </span>
-                    </>
-                  ) : (
-                    <>
-                      <TrendingDown className="h-3.5 w-3.5" />
-                      <span className="text-xs font-medium">
-                        {percentageChange.toFixed(1)}%
-                      </span>
-                    </>
-                  )}
-                  <span className="text-xs text-violet-100">지난달 대비</span>
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-1">
+                    {percentageChange > 0 ? (
+                      <>
+                        <TrendingUp className="h-3.5 w-3.5" />
+                        <span className="text-xs font-medium">
+                          +{percentageChange.toFixed(1)}%
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <TrendingDown className="h-3.5 w-3.5" />
+                        <span className="text-xs font-medium">
+                          {percentageChange.toFixed(1)}%
+                        </span>
+                      </>
+                    )}
+                    <span className="text-xs text-violet-100">지난달 대비</span>
+                  </div>
+                  
+                  <Button 
+                    asChild 
+                    variant="secondary" 
+                    size="sm" 
+                    className="h-7 px-3 text-xs bg-white/20 hover:bg-white/30 text-white border-none"
+                  >
+                    <Link href="/dashboard/transactions">
+                      내역 보기 <ArrowRight className="ml-1 h-3 w-3" />
+                    </Link>
+                  </Button>
                 </div>
               </div>
               <div className="rounded-full bg-white/20 p-3 backdrop-blur-sm">
-                <DollarSign className="h-7 w-7" />
+                <DollarSign className="h-7 w-7 text-white" />
               </div>
             </div>
           </div>
@@ -60,10 +77,10 @@ export function SpendingSummary({
       {/* Budget Cards */}
       <div className="grid grid-cols-2 gap-3">
         {/* Budget Remaining */}
-        <Card className="shadow-sm">
+        <Card className="shadow-sm bg-card border-border">
           <CardContent className="p-4">
             <div className="flex flex-col">
-              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">남은 예산</p>
+              <p className="text-xs font-medium text-muted-foreground mb-1">남은 예산</p>
               <p
                 className={`text-2xl font-bold ${
                   isOverBudget ? "text-red-600 dark:text-red-400" : "text-emerald-600 dark:text-emerald-400"
@@ -71,7 +88,7 @@ export function SpendingSummary({
               >
                 {formatCurrency(Math.abs(budgetRemaining))}
               </p>
-              <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+              <p className="text-[10px] text-muted-foreground mt-1">
                 {isOverBudget ? "⚠️ 예산 초과" : `✓ ${(100 - budgetUsedPercentage).toFixed(0)}% 남음`}
               </p>
             </div>
@@ -79,11 +96,11 @@ export function SpendingSummary({
         </Card>
 
         {/* Monthly Budget */}
-        <Card className="shadow-sm">
+        <Card className="shadow-sm bg-card border-border">
           <CardContent className="p-4">
             <div className="flex flex-col">
-              <p className="text-xs font-medium text-slate-600 dark:text-slate-400 mb-1">월 예산</p>
-              <p className="text-2xl font-bold text-slate-900 dark:text-slate-100">
+              <p className="text-xs font-medium text-muted-foreground mb-1">월 예산</p>
+              <p className="text-2xl font-bold text-foreground">
                 {formatCurrency(monthlyBudget)}
               </p>
               <div className="mt-2">
@@ -99,7 +116,7 @@ export function SpendingSummary({
                     style={{ width: `${Math.min(budgetUsedPercentage, 100)}%` }}
                   />
                 </div>
-                <p className="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+                <p className="text-[10px] text-muted-foreground mt-1">
                   {budgetUsedPercentage.toFixed(0)}% 사용 중
                 </p>
               </div>
@@ -110,4 +127,3 @@ export function SpendingSummary({
     </div>
   );
 }
-

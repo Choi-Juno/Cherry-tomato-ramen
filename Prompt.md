@@ -517,3 +517,244 @@ PHASE 5 – Edge Cases & Validation
 
 Start with PHASE 1: describe the UX for editing and deleting transactions based on a typical RecentTransactions list.
 ```
+## UI 수정 Prompt 1
+```
+You are a senior frontend architect and product engineer.
+
+Context:
+- Tech stack:
+  - Next.js (App Router)
+  - React
+  - TypeScript
+  - TailwindCSS
+  - Supabase (PostgreSQL + Auth)
+  - (Optional) external AI/ML service for insights
+- Existing key components (names may be approximate):
+  - Dashboard.tsx
+  - SpendingChart.tsx
+  - CategoryAnalysis.tsx
+  - AIInsights.tsx
+  - RecentTransactions.tsx
+  - BudgetSetting.tsx
+  - Settings.tsx
+
+The product is an “AI Spending Coach” for university students.  
+The UI is already implemented but needs targeted improvements and bug fixes.
+
+====================================================
+[Primary UI Issues To Fix]
+
+You must focus on the following 4 items:
+
+1) Budget Inconsistency Bug
+   - Problem:
+     - In the new profile environment vs existing profile environment,
+       the budget shown in the Dashboard "Budget Summary" and the budget shown in the dedicated "Budget" tab (or BudgetSetting page) are different / inconsistent.
+   - Goal:
+     - Ensure that:
+       - The Dashboard’s budget section
+       - The Budget tab/page (BudgetSetting)
+       both read from the same source of truth and display consistent values.
+     - This must work correctly for:
+       - Existing users / profiles
+       - Newly created users / profiles
+
+2) Weekly Spending Trend → Support Weekly / Monthly / Daily Views
+   - Problem:
+     - The “Weekly Spending Trend” widget in the Dashboard currently only shows weekly data.
+   - Goal:
+     - Modify this widget so that users can switch between:
+       - Daily view
+       - Weekly view
+       - Monthly view
+     - Provide a clean toggle UI (e.g., segmented control / tabs: [Daily | Weekly | Monthly]).
+     - Ensure the chart labels, aggregation, and date ranges change correctly with the selected view.
+
+3) AI Insights Tab – Add Insight Categories
+   - Problem:
+     - The AI Insights section on the Dashboard does not yet reflect the categorized tabs that exist in the “Insights” view.
+   - Goal:
+     - In the Dashboard’s AI Insights area, add tabs (or pill-style segmented controls) with:
+       - “Insights” (general insights)
+       - “Potential Savings” (절약 가능)
+       - “Warnings” (주의 항목)
+     - The content should filter or group AI insight cards according to these categories.
+     - The tab structure should be consistent with any existing “Insights” page/tab in the app.
+
+4) Merge Weekly Spending Trend & Category Spending Sections
+   - Problem:
+     - The Dashboard currently has:
+       - A “Weekly Spending Trend” section.
+       - A separate “Spending by Category” section.
+     - These are visually and functionally separate, potentially redundant.
+   - Goal:
+     - Design and implement a unified component or section that combines:
+       - Time-series spending trend (by day/week/month).
+       - Category-wise breakdown (e.g., stacked chart, toggle between “Trend” and “By Category”).
+     - The UX should make it easy for users to:
+       - Understand how spending evolves over time.
+       - See which categories contribute most to that spending.
+     - You may use:
+       - Tabs inside the same card:
+         - [Trend] vs [By Category]
+       - Or a layout where charts share controls (e.g., range selector that affects both).
+
+====================================================
+[What You MUST Do – Step by Step]
+
+Use “Let’s think step by step” internally.  
+Proceed in the following phases:
+
+----------------------------------------------------
+PHASE 1 – Analyze Existing UI Structure
+
+1) Infer or propose the current UI/route structure:
+   - Dashboard page (e.g., `/dashboard`)
+   - Budget tab/page (e.g., `/dashboard/budget` or `/budget`)
+   - Insights tab/page (if separate)
+   - Components:
+     - `<Dashboard />`
+     - `<SpendingChart />`
+     - `<CategoryAnalysis />`
+     - `<AIInsights />`
+     - `<BudgetSetting />`
+   - Explain where each of the 4 issues likely manifests in the code.
+
+2) Propose a revised high-level layout for the Dashboard:
+   - Sections:
+     - Header (profile, summary)
+     - Budget summary
+     - Unified “Trend & Category” section
+     - AI Insights section (with the required tabs)
+     - Recent transactions (if present)
+   - Make sure the layout works for both desktop and mobile.
+
+----------------------------------------------------
+PHASE 2 – Fix Budget Inconsistency (New vs Existing Profile + Dashboard vs Budget Tab)
+
+3) Define a single source of truth for budgets:
+   - e.g., Supabase table `budgets` with columns:
+     - user_id
+     - period (month/year)
+     - total_budget
+     - per_category_budget (JSON or relational)
+   - Or align with the existing schema if one already exists.
+
+4) Identify how the Dashboard currently reads budget data vs how the Budget tab reads it:
+   - If needed, propose refactoring:
+     - Move budget fetching logic into a shared hook or server function:
+       - `useUserBudget()` or a server action `getUserBudget(userId, period)`.
+   - Ensure consistent behavior for:
+     - New profiles (no budget yet)
+     - Existing profiles (predefined budgets).
+
+5) Implement:
+   - A unified budget fetching function (server or client).
+   - Update both:
+     - Dashboard budget summary
+     - BudgetSetting component/page
+     to use this shared function or hook.
+   - Show TypeScript code examples for:
+     - The shared utility/hook.
+     - Updated Dashboard budget section.
+     - Updated Budget tab UI.
+
+6) Handle edge cases:
+   - No budget set yet:
+     - Show a CTA like “Set your first budget” linking to Budget tab.
+   - Multiple periods (e.g., month selection).
+
+----------------------------------------------------
+PHASE 3 – Enhance Spending Trend to Support Daily/Weekly/Monthly Views
+
+7) Extend the SpendingChart component:
+   - Add a `viewMode` state: `"daily" | "weekly | "monthly"`.
+   - Add a UI control (tabs or segmented control) to switch the view.
+   - Implement data aggregation logic:
+     - Daily: raw per-day sums.
+     - Weekly: sum by week number.
+     - Monthly: sum by month.
+   - Ensure the X-axis labels, tooltips, and legend reflect the mode.
+
+8) Provide concrete React + TypeScript code:
+   - Component props and state.
+   - Example using a chart library (e.g., Recharts) to render different views.
+   - Tailwind classes for a clean UI (e.g., small pill buttons).
+
+----------------------------------------------------
+PHASE 4 – AI Insights Tabs (Insights / Potential Savings / Warnings)
+
+9) Design the data model for AI insights:
+   - At least:
+     - id
+     - user_id
+     - type: `"insight" | "saving" | "warning"`
+     - title
+     - message
+     - severity (optional)
+     - created_at
+   - Or align with existing schema if already defined.
+
+10) Update the AIInsights component:
+    - Add a tab or segmented control with:
+      - “Insights”
+      - “Potential Savings”
+      - “Warnings”
+    - Filter displayed insight cards by `type` based on the selected tab.
+    - Handle case where a tab has no items (empty state message).
+
+11) Provide concrete example code:
+    - Tab UI implementation (e.g., using a simple button group or shadcn/ui Tabs).
+    - Insight card layout.
+    - Data fetching and filtering logic.
+
+----------------------------------------------------
+PHASE 5 – Merge Weekly Trend & Category Spending Sections
+
+12) Propose a unified section/component:
+    - Name: e.g., `<SpendingOverviewSection />`.
+    - Contains:
+      - Controls:
+        - View mode: [Daily | Weekly | Monthly]
+        - Sub-tabs: [Trend] / [By Category]
+      - Content:
+        - Trend view: time-series chart of total spending.
+        - By Category view: pie chart, bar chart, or stacked area by category.
+
+13) Implement the unified component:
+    - Show TypeScript React code that:
+      - Shares date range + view mode state.
+      - Reuses or composes:
+        - `<SpendingChart />` (for trend)
+        - `<CategoryAnalysis />` (for category breakdown)
+      - Uses a consistent visual style (cards, shadows, spacing).
+
+14) Remove or refactor old separate sections:
+    - Replace individual “Weekly Spending Trend” and “Spending by Category” sections with the new unified section in Dashboard.
+
+----------------------------------------------------
+PHASE 6 – Final Polish & Consistency
+
+15) Review overall Dashboard UX:
+    - Ensure the following are visually and functionally coherent:
+      - Budget summary & Budget tab.
+      - Spending overview (trend + category).
+      - AI Insights with tabs.
+    - Suggest any minor UI tweaks (spacing, headings, labels) to improve clarity.
+
+16) Provide:
+    - Final proposed `Dashboard.tsx` layout (high-level code).
+    - Short explanation for each major section.
+    - Notes on how to extend this later (e.g., adding custom date ranges).
+
+====================================================
+[Output Format]
+
+- Use clear headings per PHASE.
+- Provide code snippets in TypeScript + React + Tailwind.
+- Explain your reasoning when choosing specific UI patterns (tabs vs toggles, merged sections, etc.).
+- Make sure all changes are compatible with Next.js App Router.
+
+Start with PHASE 1: analyze the current Dashboard layout and show how you will reorganize it to accommodate the 4 required changes.
+
+```

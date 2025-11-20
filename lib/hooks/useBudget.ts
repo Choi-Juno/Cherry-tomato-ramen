@@ -36,6 +36,7 @@ export function useBudget(month?: string) {
     }
   }, [targetMonth, supabase]);
 
+  // Always calculate totalBudget from the fetched budgets state
   const totalBudget = budgets.reduce((sum, item) => sum + item.amount, 0);
 
   const setBudget = async (input: CreateBudgetInput) => {

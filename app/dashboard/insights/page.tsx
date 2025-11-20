@@ -12,6 +12,7 @@ import { useState, useEffect, useMemo } from "react";
 import { mlApiClient } from "@/lib/ml/client";
 import { createClient } from "@/lib/supabase/client";
 import { useTransactionsStore } from "@/lib/store/transactions-store";
+import { cn } from "@/lib/utils";
 
 const TABS_DATA = [
   { value: "all", label: "전체", icon: Lightbulb },
@@ -186,7 +187,16 @@ export default function InsightsPage() {
           {TABS_DATA.map((tab) => {
             const Icon = tab.icon;
             return (
-              <TabsTrigger key={tab.value} value={tab.value} className="gap-1.5 text-sm">
+              <TabsTrigger 
+                key={tab.value} 
+                value={tab.value} 
+                className={cn(
+                  "gap-1.5 text-sm",
+                  tab.value === "all" && "data-[state=active]:text-violet-600 dark:data-[state=active]:text-violet-400",
+                  tab.value === "savings" && "data-[state=active]:text-emerald-600 dark:data-[state=active]:text-emerald-400",
+                  tab.value === "warnings" && "data-[state=active]:text-amber-600 dark:data-[state=active]:text-amber-400"
+                )}
+              >
                 <Icon className="h-3.5 w-3.5" />
                 {tab.label}
               </TabsTrigger>
@@ -284,4 +294,3 @@ export default function InsightsPage() {
     </div>
   );
 }
-
