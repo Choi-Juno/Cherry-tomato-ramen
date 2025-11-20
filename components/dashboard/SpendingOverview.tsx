@@ -27,13 +27,20 @@ const CATEGORY_LABELS: Record<string, string> = {
   other: "기타",
 };
 
+// Moved outside component to prevent memoization issues
+function getWeekLabel(dateStr: string) {
+  const now = new Date();
+  const date = new Date(dateStr);
+  const diffTime = now.getTime() - date.getTime();
+  const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
+  if (diffWeeks === 0) return "이번 주";
+  return `${diffWeeks}주 전`;
+}
+
 export function SpendingOverview({ transactions }: SpendingOverviewProps) {
   const [viewMode, setViewMode] = useState<ViewMode>("weekly");
   const [chartType, setChartType] = useState<ChartType>("trend");
 
-  // Filter transactions based on viewMode range (optional, currently using all transactions for simple aggregation)
-  // For a real app, you might want to filter by selected month/year range.
-  
   // 1. Aggregate for Trend Chart
   const trendData = useMemo(() => {
     const dataMap: Record<string, number> = {};
@@ -42,7 +49,6 @@ export function SpendingOverview({ transactions }: SpendingOverviewProps) {
     transactions.forEach((t) => {
       const date = new Date(t.date);
       let key = "";
-      let label = "";
 
       if (viewMode === "daily") {
         // Last 30 days
@@ -50,7 +56,6 @@ export function SpendingOverview({ transactions }: SpendingOverviewProps) {
         const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
         if (diffDays <= 30) {
           key = t.date;
-          label = `${date.getMonth() + 1}/${date.getDate()}`;
         }
       } else if (viewMode === "weekly") {
         // Last 12 weeks
@@ -62,14 +67,12 @@ export function SpendingOverview({ transactions }: SpendingOverviewProps) {
           const startOfWeek = new Date(date);
           startOfWeek.setDate(date.getDate() - date.getDay()); 
           key = startOfWeek.toISOString().split("T")[0];
-          label = weekNum === 0 ? "이번 주" : `${weekNum}주 전`;
         }
       } else if (viewMode === "monthly") {
         // Last 12 months
         const monthDiff = (now.getFullYear() - date.getFullYear()) * 12 + (now.getMonth() - date.getMonth());
         if (monthDiff <= 12) {
           key = t.date.slice(0, 7); // YYYY-MM
-          label = `${date.getMonth() + 1}월`;
         }
       }
 
@@ -80,33 +83,28 @@ export function SpendingOverview({ transactions }: SpendingOverviewProps) {
 
     // Convert map to array and sort
     return Object.entries(dataMap)
-      .map(([date, amount]) => ({
-        date, // used for sorting
-        amount,
-        label: viewMode === "daily" ? date.slice(5) : (viewMode === "weekly" ? undefined : `${parseInt(date.slice(5,7))}월`), // Fallback label
-        // Real label needs to be preserved
-      }))
-      .sort((a, b) => a.date.localeCompare(b.date))
-      .map(item => ({
-        ...item,
-        label: viewMode === "weekly" ? getWeekLabel(item.date) : item.label
-      }));
+      .map(([date, amount]) => {
+        let label = "";
+        if (viewMode === "daily") {
+          label = date.slice(5);
+        } else if (viewMode === "monthly") {
+          label = `${parseInt(date.slice(5,7))}월`;
+        } else if (viewMode === "weekly") {
+          label = getWeekLabel(date);
+        }
+        
+        return {
+          date, // used for sorting
+          amount,
+          label, 
+        };
+      })
+      .sort((a, b) => a.date.localeCompare(b.date));
   }, [transactions, viewMode]);
-
-  function getWeekLabel(dateStr: string) {
-    const now = new Date();
-    const date = new Date(dateStr);
-    const diffTime = now.getTime() - date.getTime();
-    const diffWeeks = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 7));
-    if (diffWeeks === 0) return "이번 주";
-    return `${diffWeeks}주 전`;
-  }
 
   // 2. Aggregate for Category Chart
   const categoryData = useMemo(() => {
     const categoryTotals: Record<string, number> = {};
-
-    // Filter transactions based on viewMode range same as above
     const now = new Date();
 
     transactions.forEach((t) => {
@@ -195,4 +193,3 @@ export function SpendingOverview({ transactions }: SpendingOverviewProps) {
     </Card>
   );
 }
-

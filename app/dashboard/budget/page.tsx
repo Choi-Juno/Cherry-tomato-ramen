@@ -95,6 +95,7 @@ export default function BudgetPage() {
         variant: "success",
       });
     } catch (error) {
+      console.error(error);
       addToast({
         title: "설정 실패",
         description: "예산 저장 중 오류가 발생했습니다.",
