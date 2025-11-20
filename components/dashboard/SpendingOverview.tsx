@@ -43,43 +43,57 @@ export function SpendingOverview({ transactions }: SpendingOverviewProps) {
 
     // 1. Aggregate for Trend Chart
     const trendData = useMemo(() => {
-        const dataMap: Record<string, number> = {};
         const now = new Date();
+        const dataMap: Record<string, number> = {};
+
+        // Helper to format date as YYYY-MM-DD
+        const formatDate = (d: Date) => d.toISOString().split("T")[0];
+
+        // Initialize slots with 0
+        if (viewMode === "daily") {
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(now);
+                d.setDate(now.getDate() - i);
+                const key = formatDate(d);
+                dataMap[key] = 0;
+            }
+        } else if (viewMode === "weekly") {
+            const currentWeekStart = new Date(now);
+            currentWeekStart.setDate(now.getDate() - now.getDay());
+            for (let i = 3; i >= 0; i--) {
+                const d = new Date(currentWeekStart);
+                d.setDate(currentWeekStart.getDate() - i * 7);
+                const key = formatDate(d);
+                dataMap[key] = 0;
+            }
+        } else if (viewMode === "monthly") {
+            for (let i = 3; i >= 0; i--) {
+                // Create date for the 1st of the month
+                const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+                const key = `${d.getFullYear()}-${String(
+                    d.getMonth() + 1
+                ).padStart(2, "0")}`;
+                dataMap[key] = 0;
+            }
+        }
 
         transactions.forEach((t) => {
             const date = new Date(t.date);
             let key = "";
 
             if (viewMode === "daily") {
-                // Last 7 days for daily view
-                const diffTime = now.getTime() - date.getTime();
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                if (diffDays < 7) {
-                    key = t.date;
-                }
+                // Check if transaction is within range (handled by map check)
+                key = t.date;
             } else if (viewMode === "weekly") {
-                // Last 4 weeks for weekly view
-                const diffTime = now.getTime() - date.getTime();
-                const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-                const weekNum = Math.floor(diffDays / 7);
-                if (weekNum < 4) {
-                    // Calculate start of week
-                    const startOfWeek = new Date(date);
-                    startOfWeek.setDate(date.getDate() - date.getDay());
-                    key = startOfWeek.toISOString().split("T")[0];
-                }
+                const startOfWeek = new Date(date);
+                startOfWeek.setDate(date.getDate() - date.getDay());
+                key = formatDate(startOfWeek);
             } else if (viewMode === "monthly") {
-                // Last 4 months for monthly view
-                const monthDiff =
-                    (now.getFullYear() - date.getFullYear()) * 12 +
-                    (now.getMonth() - date.getMonth());
-                if (monthDiff < 4) {
-                    key = t.date.slice(0, 7); // YYYY-MM
-                }
+                key = t.date.slice(0, 7); // YYYY-MM
             }
 
-            if (key) {
-                dataMap[key] = (dataMap[key] || 0) + t.amount;
+            if (Object.prototype.hasOwnProperty.call(dataMap, key)) {
+                dataMap[key] += t.amount;
             }
         });
 

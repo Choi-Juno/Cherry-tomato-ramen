@@ -17,8 +17,8 @@
   --color-muted: 241 245 249; /* slate-100 */
   --color-muted-foreground: 100 116 139; /* slate-500 */
   
-  --color-border: 226 232 240; /* slate-200 */
-  --color-border-strong: 203 213 225; /* slate-300 */
+  --color-border: transparent;
+  --color-border-strong: transparent;
   
   --color-accent: 124 58 237; /* violet-600 */
   --color-accent-foreground: 255 255 255; /* white */

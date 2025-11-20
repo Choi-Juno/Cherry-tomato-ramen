@@ -84,10 +84,10 @@ function Toast({
   onClose,
 }: ToastProps & { onClose: () => void }) {
   const variantStyles = {
-    default: "bg-slate-900 text-white border-slate-800",
-    success: "bg-emerald-600 text-white border-emerald-700",
-    error: "bg-red-600 text-white border-red-700",
-    warning: "bg-amber-600 text-white border-amber-700",
+    default: "bg-slate-900 text-white",
+    success: "bg-emerald-600 text-white",
+    error: "bg-red-600 text-white",
+    warning: "bg-amber-600 text-white",
   };
 
   const icons = {
@@ -101,7 +101,7 @@ function Toast({
     <div
       className={cn(
         "pointer-events-auto w-full max-w-md mx-auto",
-        "rounded-xl border shadow-lg p-4",
+        "rounded-xl shadow-lg p-4",
         "flex items-start gap-3",
         "animate-in slide-in-from-top-5 fade-in",
         variantStyles[variant]
