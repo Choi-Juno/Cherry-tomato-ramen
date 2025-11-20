@@ -337,3 +337,183 @@ STEP 6 — Visual Sanity Check & Guidelines
 Be extra careful to NOT simply overwrite everything blindly.
 Instead, audit → reason → fix, especially where current colors are broken or unreadable in dark mode.
 ```
+
+## 수정, 삭제 기능 추가
+```
+You are a senior full-stack engineer.
+
+Context:
+- We are building an “AI Spending Coach” web app for university students.
+- Tech stack:
+  - Next.js (App Router)
+  - React
+  - TypeScript
+  - TailwindCSS
+  - Supabase (PostgreSQL + Auth)
+- We already have:
+  - A transaction input component (e.g., ExpenseInput)
+  - A transaction list component (e.g., RecentTransactions)
+  - A Dashboard page that shows recent transactions and charts.
+
+Goal:
+Add robust **EDIT** and **DELETE** functionality for transactions
+with proper UX, data integrity, and Supabase integration.
+
+====================================================
+[Data Model Assumptions]
+
+Assume a Supabase table `transactions` roughly like:
+
+- id (uuid, primary key)
+- user_id (uuid, FK to auth.users)
+- amount (numeric)
+- category_id or category (string or FK)
+- memo / description (text)
+- date (timestamptz or date)
+- created_at (timestamptz)
+- updated_at (timestamptz)
+- is_deleted (boolean, default false)  // optional for soft delete
+
+If you need to adjust this schema, propose the changes explicitly.
+
+====================================================
+[What I want you to do]
+
+Use “Let’s think step by step” internally and proceed in the following phases.
+
+----------------------------------------------------
+PHASE 1 – UX & Flow Design
+
+1) Analyze and define the UX around editing and deleting transactions:
+   - Where the edit/delete entry points should live:
+     - e.g., action buttons (🖊 Edit / 🗑 Delete) in each row of RecentTransactions.
+   - Decide whether editing happens:
+     - in a modal dialog, OR
+     - inline expansion of the row.
+   - Define the flow:
+     - User clicks "Edit" → existing values are loaded → user edits → validation → save → list updates.
+     - User clicks "Delete" → confirmation dialog → soft delete (set is_deleted = true) or hard delete → list updates.
+
+2) Describe the UI states you will support:
+   - Idle, loading, success, error.
+   - Optimistic update vs. refetch on success.
+
+----------------------------------------------------
+PHASE 2 – Supabase / Backend Layer
+
+3) Ensure the Supabase schema supports:
+   - updated_at column (auto-updated on change).
+   - optional is_deleted column for soft delete.
+
+4) Show SQL or Supabase migration statements to:
+   - Add updated_at with default now(), if missing.
+   - Add is_deleted boolean with default false, if we choose soft delete.
+   - Add useful indexes if needed (user_id, date, is_deleted).
+
+5) Explain the security model:
+   - Only the owner (user_id) can edit or delete their own transactions.
+   - RLS (Row Level Security) policies (outline the policy statements).
+
+6) Implement (or describe) the API layer:
+   - Either:
+     - Use Supabase client directly in server components / server actions, OR
+     - Create dedicated Next.js API routes, such as:
+       - PATCH /api/transactions/[id]
+       - DELETE /api/transactions/[id]
+   - For each endpoint or server action:
+     - Input validation (id, amount, date, etc.).
+     - Auth check (ensure user matches user_id).
+     - Update or soft-delete the row.
+     - Return the updated transaction or a success flag.
+
+Provide TypeScript examples of these functions/endpoints.
+
+----------------------------------------------------
+PHASE 3 – Frontend Integration (React + Next.js + Tailwind)
+
+7) Update the RecentTransactions component to include actions:
+   - For each transaction row, add:
+     - “Edit” button
+     - “Delete” button (or icon)
+   - Show how props and types are structured:
+     - Transaction type (id, amount, category, date, memo, etc.).
+
+8) Implement an Edit Transaction UI:
+   - Prefer a modal dialog:
+     - Pre-filled fields: amount, category, memo, date.
+     - Basic validation (non-empty, amount > 0, valid date).
+   - Show a React component, e.g. `<EditTransactionDialog />`:
+     - Props: transaction, onClose, onSave.
+   - On save:
+     - Call the backend (server action or API route).
+     - Show loading state on the button.
+     - Handle success:
+       - Update the local list (optimistic) OR refetch.
+     - Handle error:
+       - Show an error message (e.g., toast or alert).
+
+9) Implement Delete Transaction UX:
+   - A confirmation dialog or simple confirm modal:
+     - “Are you sure you want to delete this transaction?”
+   - On confirm:
+     - Call delete API / server action.
+     - Either:
+       - Remove the item from the list optimistically, OR
+       - Refetch the list.
+   - Handle loading and error states.
+
+10) Provide concrete example code:
+   - Updated `RecentTransactions.tsx` or equivalent.
+   - `EditTransactionDialog.tsx` component.
+   - Optional `ConfirmDialog` component for delete.
+   - Any related hooks:
+     - `useTransactions()`, `useEditTransaction()`, `useDeleteTransaction()`.
+
+Use TailwindCSS classes for basic styling and keep the UI consistent with a finance dashboard.
+
+----------------------------------------------------
+PHASE 4 – State Management & Refresh
+
+11) Describe how you will keep the UI in sync:
+   - Recommended approach:
+     - Use React Query / SWR, OR
+     - Simple state + refetch logic per page.
+   - When a transaction is edited or deleted:
+     - Explain whether you:
+       - Mutate local state directly, OR
+       - Trigger a re-fetch from Supabase.
+
+12) Show sample code snippets for:
+   - Fetching transactions from Supabase (server or client).
+   - Updating cache/state after mutation.
+
+----------------------------------------------------
+PHASE 5 – Edge Cases & Validation
+
+13) Consider edge cases:
+   - User tries to edit a transaction that no longer exists.
+   - Network error during update/delete.
+   - User double-clicks delete or spam-clicks buttons.
+   - Timezone issues for date handling.
+
+14) Implement defensive checks in code:
+   - Disable buttons while loading.
+   - Graceful error messages.
+   - Default/fallback values if some fields are missing.
+
+====================================================
+[Output Format]
+
+- Use clear headings for each PHASE and STEP.
+- Provide:
+  - Supabase schema/migration snippets.
+  - RLS policy examples (even if simplified).
+  - Example Next.js API routes or server actions.
+  - React + TSX component code for:
+    - Updated transaction list
+    - Edit dialog
+    - Delete confirmation
+- Explain the reasoning behind each design choice (soft-delete vs hard-delete, optimistic vs refetch, etc.).
+
+Start with PHASE 1: describe the UX for editing and deleting transactions based on a typical RecentTransactions list.
+```

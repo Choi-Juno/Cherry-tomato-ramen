@@ -10,9 +10,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { formatCurrency, formatDate } from "@/lib/utils";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, Pencil } from "lucide-react";
 import { useTransactionsStore } from "@/lib/store/transactions-store";
 import { useToast } from "@/components/ui/toast";
+import { ExpenseInputModal, ExpenseFormData } from "@/components/transactions/ExpenseInputModal";
+import { ConfirmDialog } from "@/components/ui/confirm-dialog";
+import { Transaction } from "@/types/transaction";
 
 const CATEGORY_LABELS: Record<string, string> = {
   food: "식비",
@@ -37,12 +40,20 @@ const CATEGORY_COLORS: Record<string, string> = {
 };
 
 export default function TransactionsPage() {
-  const { transactions, deleteTransaction } = useTransactionsStore();
+  const { transactions, deleteTransaction, updateTransaction } = useTransactionsStore();
   const { addToast } = useToast();
   
   const [searchQuery, setSearchQuery] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [periodFilter, setPeriodFilter] = useState("month");
+
+  // Edit & Delete State
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  
+  const [deletingTransaction, setDeletingTransaction] = useState<{ id: string; description: string } | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // 카테고리 아이콘 맵핑
   const categoryIcons: Record<string, string> = {
@@ -104,23 +115,62 @@ export default function TransactionsPage() {
     return { total, count, average };
   }, [filteredTransactions]);
 
-  // 삭제 핸들러
-  const handleDelete = async (id: string, description: string) => {
-    if (confirm(`"${description}" 거래를 삭제하시겠습니까?`)) {
-      try {
-        await deleteTransaction(id);
-        addToast({
-          title: "삭제 완료",
-          description: "거래 내역이 삭제되었습니다.",
-          variant: "success",
-        });
-      } catch {
-        addToast({
-          title: "삭제 실패",
-          description: "거래 삭제 중 오류가 발생했습니다.",
-          variant: "error",
-        });
-      }
+  // 삭제 시작 핸들러
+  const handleDeleteClick = (id: string, description: string) => {
+    setDeletingTransaction({ id, description });
+    setIsDeleteConfirmOpen(true);
+  };
+
+  // 삭제 확인 핸들러
+  const handleDeleteConfirm = async () => {
+    if (!deletingTransaction) return;
+
+    try {
+      setIsDeleting(true);
+      await deleteTransaction(deletingTransaction.id);
+      addToast({
+        title: "삭제 완료",
+        description: "거래 내역이 삭제되었습니다.",
+        variant: "success",
+      });
+      setIsDeleteConfirmOpen(false);
+      setDeletingTransaction(null);
+    } catch {
+      addToast({
+        title: "삭제 실패",
+        description: "거래 삭제 중 오류가 발생했습니다.",
+        variant: "error",
+      });
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  // 수정 시작 핸들러
+  const handleEditClick = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setIsEditModalOpen(true);
+  };
+
+  // 수정 완료 핸들러
+  const handleEditSubmit = async (data: ExpenseFormData) => {
+    if (!editingTransaction) return;
+
+    try {
+      await updateTransaction(editingTransaction.id, data);
+      addToast({
+        title: "수정 완료",
+        description: "거래 내역이 수정되었습니다.",
+        variant: "success",
+      });
+      setIsEditModalOpen(false);
+      setEditingTransaction(null);
+    } catch {
+      addToast({
+        title: "수정 실패",
+        description: "거래 수정 중 오류가 발생했습니다.",
+        variant: "error",
+      });
     }
   };
 
@@ -261,7 +311,7 @@ export default function TransactionsPage() {
                   </div>
 
                   <div className="flex items-center gap-2 ml-3">
-                    <div className="text-right">
+                    <div className="text-right mr-2">
                       <p className="font-bold text-slate-900 dark:text-slate-100 text-base">
                         {formatCurrency(transaction.amount)}
                       </p>
@@ -272,12 +322,22 @@ export default function TransactionsPage() {
                         {transaction.payment_method === "other" && "기타"}
                       </p>
                     </div>
+                    
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-9 w-9 p-0 text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-950/50"
+                      className="h-9 w-9 p-0 text-slate-500 hover:text-violet-600 hover:bg-violet-50 dark:hover:bg-violet-950/50"
+                      onClick={() => handleEditClick(transaction)}
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </Button>
+
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-9 w-9 p-0 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/50"
                       onClick={() =>
-                        handleDelete(transaction.id, transaction.description)
+                        handleDeleteClick(transaction.id, transaction.description)
                       }
                     >
                       <Trash2 className="h-4 w-4" />
@@ -289,7 +349,40 @@ export default function TransactionsPage() {
           </CardContent>
         </Card>
       )}
+
+      {/* Edit Dialog */}
+      <ExpenseInputModal
+        open={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setEditingTransaction(null);
+        }}
+        onSubmit={handleEditSubmit}
+        initialData={
+          editingTransaction
+            ? {
+                amount: editingTransaction.amount,
+                description: editingTransaction.description,
+                category: editingTransaction.category,
+                payment_method: editingTransaction.payment_method,
+                merchant: editingTransaction.merchant,
+                date: editingTransaction.date,
+              }
+            : null
+        }
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        open={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        title="거래 내역 삭제"
+        description={`"${deletingTransaction?.description}" 거래를 정말 삭제하시겠습니까?`}
+        onConfirm={handleDeleteConfirm}
+        confirmText="삭제"
+        variant="destructive"
+        isLoading={isDeleting}
+      />
     </div>
   );
 }
-

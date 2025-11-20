@@ -49,6 +49,7 @@ export function TransactionsProvider({
         .from("transactions")
         .select("*")
         .eq("user_id", userId)
+        .neq("is_deleted", true)
         .order("date", { ascending: false })
         .order("created_at", { ascending: false });
 
@@ -158,7 +159,7 @@ export function TransactionsProvider({
 
         const { error } = await supabase
           .from("transactions")
-          .delete()
+          .update({ is_deleted: true })
           .eq("id", id)
           .eq("user_id", userId);
 

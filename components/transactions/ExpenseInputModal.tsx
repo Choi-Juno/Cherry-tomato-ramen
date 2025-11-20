@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -58,18 +58,20 @@ const expenseSchema = z.object({
   date: z.string(),
 });
 
-type ExpenseFormData = z.infer<typeof expenseSchema>;
+export type ExpenseFormData = z.infer<typeof expenseSchema>;
 
 interface ExpenseInputModalProps {
   open: boolean;
   onClose: () => void;
   onSubmit: (data: ExpenseFormData) => Promise<void>;
+  initialData?: Partial<ExpenseFormData> | null;
 }
 
 export function ExpenseInputModal({
   open,
   onClose,
   onSubmit,
+  initialData,
 }: ExpenseInputModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -89,11 +91,41 @@ export function ExpenseInputModal({
     },
   });
 
+  // Reset form when opening or when initialData changes
+  useEffect(() => {
+    if (open) {
+      if (initialData) {
+        // Ensure date is in YYYY-MM-DD format if it's a full ISO string
+        const formattedDate = initialData.date?.split("T")[0] || new Date().toISOString().split("T")[0];
+        
+        reset({
+          amount: initialData.amount,
+          description: initialData.description,
+          category: initialData.category || "food",
+          payment_method: initialData.payment_method || "card",
+          merchant: initialData.merchant || "",
+          date: formattedDate,
+        });
+      } else {
+        reset({
+          date: new Date().toISOString().split("T")[0],
+          category: "food",
+          payment_method: "card",
+          amount: undefined,
+          description: "",
+          merchant: "",
+        });
+      }
+    }
+  }, [open, initialData, reset]);
+
   const handleFormSubmit = async (data: ExpenseFormData) => {
     setIsSubmitting(true);
     try {
       await onSubmit(data);
-      reset();
+      if (!initialData) {
+        reset(); // Only reset if adding new
+      }
       onClose();
     } catch (error) {
       console.error("Failed to submit expense:", error);
@@ -103,17 +135,25 @@ export function ExpenseInputModal({
   };
 
   const handleClose = () => {
-    reset();
+    if (!initialData) {
+      reset();
+    }
     onClose();
   };
+
+  const isEditMode = !!initialData;
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="w-[calc(100%-2rem)] max-w-md rounded-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader className="text-left pb-2">
-          <DialogTitle className="text-xl font-bold">💰 지출 기록하기</DialogTitle>
+          <DialogTitle className="text-xl font-bold">
+            {isEditMode ? "🖊 지출 수정하기" : "💰 지출 기록하기"}
+          </DialogTitle>
           <DialogDescription className="text-sm text-slate-600">
-            간편하게 오늘의 소비를 기록해보세요
+            {isEditMode
+              ? "기록된 내용을 수정합니다"
+              : "간편하게 오늘의 소비를 기록해보세요"}
           </DialogDescription>
         </DialogHeader>
 
@@ -246,7 +286,7 @@ export function ExpenseInputModal({
               className="flex-1 h-13 font-semibold bg-gradient-to-r from-violet-500 to-purple-600 shadow-lg" 
               disabled={isSubmitting}
             >
-              {isSubmitting ? "저장 중..." : "저장하기"}
+              {isSubmitting ? "저장 중..." : (isEditMode ? "수정하기" : "저장하기")}
             </Button>
           </div>
         </form>
@@ -254,4 +294,3 @@ export function ExpenseInputModal({
     </Dialog>
   );
 }
-
