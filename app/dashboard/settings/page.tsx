@@ -3,7 +3,7 @@
 // Force dynamic rendering - don't prerender at build time
 export const dynamic = 'force-dynamic';
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,10 +15,77 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { User, Bell, Download, Trash2, LogOut } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
+import { useToast } from "@/components/ui/toast";
 
 export default function SettingsPage() {
   const [notificationEnabled, setNotificationEnabled] = useState(true);
   const [notificationTone, setNotificationTone] = useState<"coach" | "friend">("coach");
+  const [userData, setUserData] = useState({ name: "", email: "" });
+  const [isLoading, setIsLoading] = useState(true);
+  
+  const supabase = createClient();
+  const router = useRouter();
+  const { addToast } = useToast();
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data: profile } = await supabase
+            .from('users')
+            .select('full_name')
+            .eq('id', user.id)
+            .single();
+
+          setUserData({
+            name: profile?.full_name || user.user_metadata?.full_name || "사용자",
+            email: user.email || ""
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch user data:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchUserData();
+  }, [supabase]);
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      addToast({
+        title: "로그아웃",
+        description: "성공적으로 로그아웃되었습니다.",
+        variant: "success",
+      });
+      router.push("/login");
+    } catch (error) {
+      console.error("Logout error:", error);
+      addToast({
+        title: "오류 발생",
+        description: "로그아웃 중 문제가 발생했습니다.",
+        variant: "error",
+      });
+    }
+  };
+
+  const handleUpdateProfile = async () => {
+    // TODO: Implement profile update logic
+    addToast({
+      title: "알림",
+      description: "프로필 업데이트 기능은 준비 중입니다.",
+      variant: "default",
+    });
+  };
+
+  if (isLoading) {
+    return <div className="p-8 text-center">로딩 중...</div>;
+  }
 
   return (
     <div className="space-y-6">
@@ -44,16 +111,19 @@ export default function SettingsPage() {
         <CardContent className="space-y-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900 dark:text-slate-100">이름</label>
-            <Input defaultValue="김지민" />
+            <Input 
+              value={userData.name} 
+              onChange={(e) => setUserData({ ...userData, name: e.target.value })}
+            />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-900 dark:text-slate-100">이메일</label>
-            <Input type="email" defaultValue="jimin@example.com" disabled />
+            <Input type="email" value={userData.email} disabled />
             <p className="text-xs text-slate-500 dark:text-slate-400">
               이메일은 변경할 수 없습니다
             </p>
           </div>
-          <Button>프로필 저장</Button>
+          <Button onClick={handleUpdateProfile}>프로필 저장</Button>
         </CardContent>
       </Card>
 
@@ -187,7 +257,7 @@ export default function SettingsPage() {
       {/* Logout */}
       <Card>
         <CardContent className="p-6">
-          <Button variant="outline" className="w-full gap-2">
+          <Button variant="outline" className="w-full gap-2" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
             로그아웃
           </Button>
@@ -202,4 +272,3 @@ export default function SettingsPage() {
     </div>
   );
 }
-
