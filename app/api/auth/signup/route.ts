@@ -24,6 +24,9 @@ export async function POST(request: NextRequest) {
     const supabase = await createClient();
 
     // 1. Supabase Auth에 사용자 생성
+    // 주의: Database Trigger(on_auth_user_created)가 실행되어
+    // public.users 테이블에 자동으로 프로필이 생성됩니다.
+    // 따라서 API에서 별도로 public.users에 insert하면 중복 키 에러가 발생합니다.
     const { data: authData, error: authError } = await supabase.auth.signUp({
       email,
       password,
@@ -48,34 +51,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // 2. public.users 테이블에 프로필 생성
-    // service role을 사용하여 RLS 우회
-    const { error: profileError } = await supabase
-      .from("users")
-      .insert([
-        {
-          id: authData.user.id,
-          email: authData.user.email!,
-          full_name: name,
-          created_at: new Date().toISOString(),
-        },
-      ]);
-
-    if (profileError) {
-      console.error("Profile creation error:", profileError);
-      
-      // 프로필 생성 실패 시 auth 사용자 삭제 (선택적)
-      // 주의: admin API 필요
-      
-      return NextResponse.json(
-        { 
-          error: "프로필 생성 중 오류가 발생했습니다.",
-          details: profileError.message 
-        },
-        { status: 500 }
-      );
-    }
-
+    // 성공 응답
     return NextResponse.json({
       success: true,
       user: {
@@ -93,4 +69,3 @@ export async function POST(request: NextRequest) {
     );
   }
 }
-
