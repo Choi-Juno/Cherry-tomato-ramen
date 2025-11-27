@@ -1,7 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 import { formatCurrency } from "@/lib/utils";
-import { TrendingUp, TrendingDown, DollarSign, ArrowRight } from "lucide-react";
+import { TrendingUp, TrendingDown, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 interface SpendingSummaryProps {
@@ -34,41 +33,30 @@ export function SpendingSummary({
                 <p className="text-3xl font-bold mb-2">
                   {formatCurrency(totalSpent)}
                 </p>
-                <div className="flex items-center gap-3">
-                  <div className="flex items-center gap-1">
-                    {percentageChange > 0 ? (
-                      <>
-                        <TrendingUp className="h-3.5 w-3.5" />
-                        <span className="text-xs font-medium">
-                          +{percentageChange.toFixed(1)}%
-                        </span>
-                      </>
-                    ) : (
-                      <>
-                        <TrendingDown className="h-3.5 w-3.5" />
-                        <span className="text-xs font-medium">
-                          {percentageChange.toFixed(1)}%
-                        </span>
-                      </>
-                    )}
-                    <span className="text-xs text-violet-100">지난달 대비</span>
-                  </div>
-                  
-                  <Button 
-                    asChild 
-                    variant="secondary" 
-                    size="sm" 
-                    className="h-7 px-3 text-xs bg-white/20 hover:bg-white/30 text-white border-none"
-                  >
-                    <Link href="/dashboard/transactions">
-                      내역 보기 <ArrowRight className="ml-1 h-3 w-3" />
-                    </Link>
-                  </Button>
+                <div className="flex items-center gap-1">
+                  {percentageChange > 0 ? (
+                    <>
+                      <TrendingUp className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">
+                        +{percentageChange.toFixed(1)}%
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <TrendingDown className="h-3.5 w-3.5" />
+                      <span className="text-xs font-medium">
+                        {percentageChange.toFixed(1)}%
+                      </span>
+                    </>
+                  )}
+                  <span className="text-xs text-violet-100">지난달 대비</span>
                 </div>
               </div>
-              <div className="rounded-full bg-white/20 p-3 backdrop-blur-sm">
-                <DollarSign className="h-7 w-7 text-white" />
-              </div>
+              <Link href="/dashboard/transactions">
+                <div className="rounded-full bg-white/20 p-3 backdrop-blur-sm hover:bg-white/30 transition-colors cursor-pointer">
+                  <ChevronRight className="h-7 w-7 text-white" />
+                </div>
+              </Link>
             </div>
           </div>
         </CardContent>
