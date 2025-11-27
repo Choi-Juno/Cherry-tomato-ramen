@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Sparkles,
-  TrendingUp,
   Users,
   Target,
   ArrowRight,
@@ -123,7 +122,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">AI 패턴 분석</h3>
                 <p className="text-slate-400 leading-relaxed">
-                  "저녁에 배달 주문이 많아요" 처럼 당신도 몰랐던 소비 패턴을 AI가 찾아냅니다.
+                  &ldquo;저녁에 배달 주문이 많아요&rdquo; 처럼 당신도 몰랐던 소비 패턴을 AI가 찾아냅니다.
                 </p>
               </CardContent>
             </Card>
@@ -136,7 +135,7 @@ export default function LandingPage() {
                 </div>
                 <h3 className="text-xl font-bold text-white mb-3">맞춤형 챌린지</h3>
                 <p className="text-slate-400 leading-relaxed">
-                  "이번 주 배달 2회 이하" 같은 구체적인 목표를 제안하고 달성을 도와드려요.
+                  &ldquo;이번 주 배달 2회 이하&rdquo; 같은 구체적인 목표를 제안하고 달성을 도와드려요.
                 </p>
               </CardContent>
             </Card>
@@ -230,7 +229,7 @@ export default function LandingPage() {
             ].map((testimonial, index) => (
               <Card key={index} className="bg-slate-900/50 border-slate-800 text-left">
                 <CardContent className="p-6">
-                  <p className="text-slate-300 mb-4 leading-relaxed">"{testimonial.quote}"</p>
+                  <p className="text-slate-300 mb-4 leading-relaxed">&ldquo;{testimonial.quote}&rdquo;</p>
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-gradient-to-br from-violet-500 to-pink-500 flex items-center justify-center text-white font-bold">
                       {testimonial.author[0]}
