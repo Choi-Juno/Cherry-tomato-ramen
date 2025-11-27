@@ -4,12 +4,12 @@ import { createClient } from "@/lib/supabase/server";
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { email, password, name } = body;
+    const { email, password, name, birth_year } = body;
 
     // 입력 검증
-    if (!email || !password || !name) {
+    if (!email || !password || !name || !birth_year) {
       return NextResponse.json(
-        { error: "이메일, 비밀번호, 이름은 필수입니다." },
+        { error: "이메일, 비밀번호, 이름, 출생연도는 필수입니다." },
         { status: 400 }
       );
     }
@@ -33,6 +33,7 @@ export async function POST(request: NextRequest) {
       options: {
         data: {
           full_name: name,
+          birth_year: birth_year,
         },
       },
     });

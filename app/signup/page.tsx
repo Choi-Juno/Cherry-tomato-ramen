@@ -11,6 +11,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { ArrowLeft } from "lucide-react";
 
 export default function SignupPage() {
@@ -23,6 +30,7 @@ export default function SignupPage() {
     email: "",
     password: "",
     confirmPassword: "",
+    age: "",
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -63,9 +71,21 @@ export default function SignupPage() {
       });
       return;
     }
+
+    if (!formData.age) {
+      addToast({
+        title: "나이 선택 필요",
+        description: "나이를 선택해주세요.",
+        variant: "error",
+      });
+      return;
+    }
     
     try {
       setIsLoading(true);
+
+      const currentYear = new Date().getFullYear();
+      const birthYear = currentYear - parseInt(formData.age) + 1; // 한국 나이 기준 계산 (만 나이 아님)
 
       // API Route를 통해 회원가입 처리
       const response = await fetch("/api/auth/signup", {
@@ -77,6 +97,7 @@ export default function SignupPage() {
           email: formData.email,
           password: formData.password,
           name: formData.name,
+          birth_year: birthYear,
         }),
       });
 
@@ -195,6 +216,28 @@ export default function SignupPage() {
                 className="h-12"
                 disabled={isLoading}
               />
+            </div>
+
+            <div className="space-y-2">
+              <label htmlFor="age" className="text-sm font-semibold text-slate-700 dark:text-slate-300">
+                나이
+              </label>
+              <Select
+                onValueChange={(value) => setFormData({ ...formData, age: value })}
+                disabled={isLoading}
+              >
+                <SelectTrigger className="h-12">
+                  <SelectValue placeholder="나이를 선택해주세요" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 22 }, (_, i) => 19 + i).map((age) => (
+                    <SelectItem key={age} value={age.toString()}>
+                      {age}세 ({new Date().getFullYear() - age + 1}년생)
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="41">41세 이상</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-2">
