@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
 import { SpendingOverview } from "@/components/dashboard/SpendingOverview";
 import { DashboardAIInsights } from "@/components/dashboard/DashboardAIInsights";
+import { AICoachingSection } from "@/components/coaching/AICoachingSection";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatCurrency, formatShortDate } from "@/lib/utils";
 import { AIInsight } from "@/types/insight";
@@ -196,6 +197,11 @@ export default function DashboardPage() {
                     isLoading={isLoadingInsights} 
                     error={insightsError} 
                 />
+            </section>
+
+            {/* AI Coaching Section */}
+            <section>
+                <AICoachingSection />
             </section>
 
             {/* Recent Transactions */}
