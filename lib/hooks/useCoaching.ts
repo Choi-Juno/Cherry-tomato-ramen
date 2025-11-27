@@ -33,6 +33,7 @@ export function useCoaching(): UseCoachingResult {
 
       let coachingSuccess = false;
       let peerSuccess = false;
+      let errorMessage: string | null = null;
 
       // Handle coaching message
       if (coachingRes.status === "fulfilled") {
@@ -45,12 +46,15 @@ export function useCoaching(): UseCoachingResult {
             }
           } catch (parseError) {
             console.error("Failed to parse coaching response:", parseError);
+            errorMessage = "데이터 처리 중 오류가 발생했습니다.";
           }
         } else {
           console.error("Coaching API error:", coachingRes.value.status);
+          errorMessage = `코칭 분석 실패 (${coachingRes.value.status})`;
         }
       } else {
         console.error("Coaching fetch failed:", coachingRes.reason);
+        errorMessage = "서버 연결에 실패했습니다.";
       }
 
       // Handle peer comparison
@@ -82,16 +86,24 @@ export function useCoaching(): UseCoachingResult {
 
       // Only set error if both failed
       if (!coachingSuccess && !peerSuccess) {
-        // Check if ML service is running
+        // Check if ML service is running to give a better error message
+        let isMLServiceDown = false;
         try {
           const healthRes = await fetch(
-            process.env.NEXT_PUBLIC_ML_API_URL || "http://localhost:8000" + "/health"
+            (process.env.NEXT_PUBLIC_ML_API_URL || "http://localhost:8000") + "/health"
           );
           if (!healthRes.ok) {
-            setError("ML 서비스가 실행되지 않았습니다. 터미널에서 ML 서비스를 시작해주세요.");
+            isMLServiceDown = true;
           }
         } catch {
-          setError("ML 서비스에 연결할 수 없습니다. 터미널에서 ML 서비스를 시작해주세요.");
+          isMLServiceDown = true;
+        }
+
+        if (isMLServiceDown) {
+          setError("ML 서비스가 실행되지 않았습니다. 터미널에서 ML 서비스를 시작해주세요.");
+        } else {
+          // ML service is up but API failed -> Show the specific API error
+          setError(errorMessage || "코칭 데이터를 불러오는데 실패했습니다.");
         }
       }
     } catch (err) {

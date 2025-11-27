@@ -43,7 +43,9 @@ export async function POST(request: NextRequest) {
     });
 
     if (!response.ok) {
-      throw new Error("ML service error");
+      const errorText = await response.text();
+      console.error(`ML Service Error (${response.status}):`, errorText);
+      throw new Error(`ML service error: ${response.status}`);
     }
 
     const result = await response.json();
