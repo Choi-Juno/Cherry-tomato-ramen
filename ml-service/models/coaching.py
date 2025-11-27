@@ -77,9 +77,6 @@ TIME_SLOT_LABELS = {
 SIGNIFICANT_INCREASE_THRESHOLD = 15  # 15% increase triggers a warning
 MIN_AMOUNT_THRESHOLD = 10000  # Minimum amount to consider
 
-# USD to KRW conversion (for cohort data comparison)
-USD_TO_KRW = 1300
-
 
 def load_coaching_patterns() -> List[Dict]:
     """Load coaching patterns from the generated JSON file."""
@@ -390,8 +387,8 @@ def compare_with_cohort(
     
     excess_categories = []
     for category, user_amount in user_spending.items():
-        # Convert cohort USD to KRW for comparison
-        cohort_avg = cohort_averages.get(category, 0) * USD_TO_KRW
+        # cohort_stats.json is already in KRW
+        cohort_avg = cohort_averages.get(category, 0)
         
         if cohort_avg > 0:
             excess_pct = ((user_amount - cohort_avg) / cohort_avg) * 100

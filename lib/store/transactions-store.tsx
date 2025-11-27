@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, useMemo } from "react";
 import { Transaction, CreateTransactionInput } from "@/types/transaction";
 import { createClient } from "@/lib/supabase/client";
 
@@ -25,7 +25,9 @@ export function TransactionsProvider({
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const supabase = createClient();
+  
+  // Memoize supabase client to prevent infinite loops
+  const supabase = useMemo(() => createClient(), []);
 
   // 인증된 사용자 ID 가져오기
   useEffect(() => {

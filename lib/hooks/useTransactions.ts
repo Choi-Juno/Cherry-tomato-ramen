@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { Transaction, CreateTransactionInput } from "@/types/transaction";
 
@@ -8,7 +8,9 @@ export function useTransactions() {
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const supabase = createClient();
+  
+  // Memoize supabase client to prevent infinite loops
+  const supabase = useMemo(() => createClient(), []);
 
   const fetchTransactions = useCallback(async () => {
     try {
@@ -16,6 +18,7 @@ export function useTransactions() {
       const { data, error } = await supabase
         .from("transactions")
         .select("*")
+        .eq("is_deleted", false)
         .order("date", { ascending: false });
 
       if (error) throw error;

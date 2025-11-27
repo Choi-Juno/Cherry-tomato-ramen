@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { AIInsight } from "@/types/insight";
 
@@ -8,7 +8,9 @@ export function useInsights() {
   const [insights, setInsights] = useState<AIInsight[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<Error | null>(null);
-  const supabase = createClient();
+  
+  // Memoize supabase client to prevent infinite loops
+  const supabase = useMemo(() => createClient(), []);
 
   const fetchInsights = useCallback(async () => {
     try {

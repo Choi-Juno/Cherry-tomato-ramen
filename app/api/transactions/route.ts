@@ -22,6 +22,7 @@ export async function GET(request: NextRequest) {
       .from("transactions")
       .select("*")
       .eq("user_id", user.id)
+      .eq("is_deleted", false)
       .order("date", { ascending: false });
 
     if (category) {

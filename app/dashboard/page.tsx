@@ -1,8 +1,5 @@
 "use client";
 
-// Force dynamic rendering - don't prerender at build time
-export const dynamic = "force-dynamic";
-
 import { SpendingSummary } from "@/components/dashboard/SpendingSummary";
 import { SpendingOverview } from "@/components/dashboard/SpendingOverview";
 import { DashboardAIInsights } from "@/components/dashboard/DashboardAIInsights";
@@ -30,7 +27,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 export default function DashboardPage() {
     const { transactions } = useTransactionsStore();
     const { totalBudget, loading: budgetLoading } = useBudget(); // useBudget hook for single source of truth
-    const supabase = createClient();
+    
+    // Memoize supabase client to prevent infinite loops
+    const supabase = useMemo(() => createClient(), []);
 
     // AI Insights 상태
     const [aiInsights, setAiInsights] = useState<AIInsight[]>([]);
