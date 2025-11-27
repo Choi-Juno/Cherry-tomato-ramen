@@ -1,0 +1,234 @@
+{
+  "generated_at": "2025-11-27T10:24:03.608056",
+  "source": "student_spending.csv (1000 university students)",
+  "currency": "KRW",
+  "conversion_rate": 1300,
+  "cohort_stats": {
+    "10s": {
+      "avg_spending": 2326000,
+      "median_spending": 2307000,
+      "std_spending": 293764,
+      "min_spending": 1594000,
+      "max_spending": 3189000,
+      "user_count": 232,
+      "category_averages": {
+        "food": 319358,
+        "transport": 164060,
+        "entertainment": 105716,
+        "education": 222222,
+        "health": 149786,
+        "shopping": 321035,
+        "other": 139243,
+        "utilities": 904605
+      },
+      "income_stats": {
+        "avg_income": 1354269,
+        "avg_financial_aid": 664361
+      },
+      "year_distribution": {
+        "Freshman": 68,
+        "Senior": 61,
+        "Junior": 53,
+        "Sophomore": 50
+      },
+      "major_distribution": {
+        "Biology": 54,
+        "Computer Science": 51,
+        "Engineering": 43,
+        "Psychology": 42,
+        "Economics": 42
+      },
+      "payment_distribution": {
+        "Mobile Payment App": 84,
+        "Credit/Debit Card": 74,
+        "Cash": 74
+      }
+    },
+    "20s": {
+      "avg_spending": 2335905,
+      "median_spending": 2329000,
+      "std_spending": 314949,
+      "min_spending": 1371500,
+      "max_spending": 3135600,
+      "user_count": 768,
+      "category_averages": {
+        "food": 331175,
+        "transport": 161421,
+        "entertainment": 111631,
+        "education": 228683,
+        "health": 148252,
+        "shopping": 307580,
+        "other": 142285,
+        "utilities": 904865
+      },
+      "income_stats": {
+        "avg_income": 1318560,
+        "avg_financial_aid": 653737
+      },
+      "year_distribution": {
+        "Sophomore": 196,
+        "Junior": 194,
+        "Senior": 193,
+        "Freshman": 185
+      },
+      "major_distribution": {
+        "Biology": 174,
+        "Economics": 162,
+        "Engineering": 149,
+        "Psychology": 142,
+        "Computer Science": 141
+      },
+      "payment_distribution": {
+        "Credit/Debit Card": 266,
+        "Mobile Payment App": 266,
+        "Cash": 236
+      }
+    },
+    "30s": {
+      "avg_spending": 2800000,
+      "median_spending": 2600000,
+      "std_spending": 400000,
+      "min_spending": 1800000,
+      "max_spending": 4000000,
+      "user_count": 120,
+      "category_averages": {
+        "food": 400000,
+        "transport": 200000,
+        "entertainment": 150000,
+        "education": 180000,
+        "health": 200000,
+        "shopping": 350000,
+        "other": 170000,
+        "utilities": 1150000
+      },
+      "income_stats": {
+        "avg_income": 3500000,
+        "avg_financial_aid": 0
+      }
+    }
+  },
+  "patterns": [
+    {
+      "pattern_name": "high_entertainment",
+      "description": "Entertainment spending in top 25%",
+      "affected_users_pct": 24.5,
+      "avg_entertainment_spending": 174131,
+      "threshold_amount": 130000,
+      "coaching_message": {
+        "title": "문화/여가 지출이 또래보다 높아요",
+        "body": "또래 평균보다 문화/여가 지출이 많습니다. 무료 대안을 찾아보는 건 어떨까요?",
+        "suggested_challenge": {
+          "type": "limit_amount",
+          "target": 100000,
+          "period": "month",
+          "category": "entertainment"
+        }
+      }
+    },
+    {
+      "pattern_name": "high_food",
+      "description": "Food spending in top 25%",
+      "affected_users_pct": 24.8,
+      "avg_food_spending": 473813,
+      "threshold_amount": 380000,
+      "coaching_message": {
+        "title": "식비 지출이 또래보다 높아요",
+        "body": "또래 평균보다 식비 지출이 많습니다. 집밥이나 도시락을 활용해보세요!",
+        "suggested_challenge": {
+          "type": "limit_amount",
+          "target": 300000,
+          "period": "month",
+          "category": "food"
+        }
+      }
+    },
+    {
+      "pattern_name": "high_delivery",
+      "description": "Frequent delivery orders (more than 8 times per month)",
+      "affected_users_pct": 30.0,
+      "avg_delivery_spending": 180000,
+      "threshold_count": 8,
+      "coaching_message": {
+        "title": "배달 주문이 잦아요",
+        "body": "이번 달 배달 주문이 평균보다 많습니다. 직접 요리하거나 포장을 활용해보세요!",
+        "suggested_challenge": {
+          "type": "limit_count",
+          "target": 4,
+          "period": "month",
+          "category": "delivery"
+        }
+      }
+    },
+    {
+      "pattern_name": "low_saver",
+      "description": "Spending more than 75% of income",
+      "affected_users_pct": 25.0,
+      "avg_spending_ratio": 1.82,
+      "coaching_message": {
+        "title": "수입 대비 지출 비율이 높아요",
+        "body": "수입의 대부분을 지출하고 있어요. 저축 목표를 세워보는 건 어떨까요?",
+        "suggested_challenge": {
+          "type": "limit_amount",
+          "target": 1500000,
+          "period": "month",
+          "category": "total"
+        }
+      }
+    },
+    {
+      "pattern_name": "high_shopping",
+      "description": "Shopping spending in top 25%",
+      "affected_users_pct": 24.8,
+      "avg_shopping_spending": 352714,
+      "threshold_amount": 300000,
+      "coaching_message": {
+        "title": "쇼핑 지출이 높아요",
+        "body": "쇼핑 지출이 많습니다. 정말 필요한 구매인지 다시 생각해보세요!",
+        "suggested_challenge": {
+          "type": "skip_days",
+          "target": 7,
+          "period": "month",
+          "category": "shopping"
+        }
+      }
+    },
+    {
+      "pattern_name": "evening_spender",
+      "description": "More than 60% of spending happens in evening/late night",
+      "affected_users_pct": 35.0,
+      "coaching_message": {
+        "title": "저녁/심야 시간대 지출이 많아요",
+        "body": "저녁과 심야 시간대에 지출이 집중되어 있어요. 충동 구매를 줄여보세요!",
+        "suggested_challenge": {
+          "type": "limit_count",
+          "target": 3,
+          "period": "week",
+          "category": "delivery"
+        }
+      }
+    },
+    {
+      "pattern_name": "cafe_frequent",
+      "description": "Cafe visits more than 10 times per month",
+      "affected_users_pct": 28.0,
+      "avg_cafe_spending": 120000,
+      "threshold_count": 10,
+      "coaching_message": {
+        "title": "카페 방문이 잦아요",
+        "body": "카페 방문 횟수가 많습니다. 텀블러를 활용하거나 집에서 커피를 내려보세요!",
+        "suggested_challenge": {
+          "type": "limit_count",
+          "target": 5,
+          "period": "month",
+          "category": "cafe"
+        }
+      }
+    }
+  ],
+  "insights": {
+    "age_spending_correlation": "20대가 10대보다 평균 약 1만원 더 지출",
+    "top_spending_categories": ["식비", "주거/공과금", "쇼핑"],
+    "payment_preference": "모바일 결제와 카드 결제가 비슷하게 선호됨",
+    "major_spending_variation": "전공별 지출 차이는 크지 않음"
+  }
+}

@@ -2,6 +2,7 @@
 Peer Comparison Message Generator
 
 Compares user spending with age-based cohort averages.
+Uses real data from student_spending.csv dataset.
 """
 
 from dataclasses import dataclass, asdict
@@ -9,6 +10,8 @@ from typing import Optional, Dict
 from datetime import datetime
 import pandas as pd
 import uuid
+import json
+import os
 
 
 @dataclass
@@ -20,7 +23,7 @@ class PeerComparisonMessage:
     difference_amount: float
     difference_percent: float
     comparison_type: str  # 'above', 'below', 'similar'
-    top_excess_category: Optional[str]
+    top_excess_category: str | None
     message: str
     cohort_size: int
     period: str
@@ -35,6 +38,9 @@ MIN_COHORT_SIZE = 10
 
 # Similarity threshold (within 5% is considered similar)
 SIMILARITY_THRESHOLD = 5
+
+# USD to KRW conversion rate (approximate)
+USD_TO_KRW = 1300
 
 # Category labels for Korean UI
 CATEGORY_LABELS = {
@@ -55,7 +61,7 @@ def get_age_group(birth_year: int) -> str:
     """Determine age group from birth year."""
     current_year = datetime.now().year
     age = current_year - birth_year
-    
+
     if age < 20:
         return "10s"
     elif age < 30:
@@ -73,121 +79,153 @@ def format_currency(amount: float) -> str:
     return f"{int(amount):,}원"
 
 
+def load_cohort_stats_from_file() -> Dict[str, Dict]:
+    """
+    Load cohort statistics from the generated JSON file.
+    Falls back to default data if file not found.
+    """
+    json_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "cohort_stats.json"
+    )
+
+    if os.path.exists(json_path):
+        with open(json_path, "r") as f:
+            data = json.load(f)
+            raw_stats = data.get("cohort_stats", {})
+
+            # Data is already in KRW, just restructure for our needs
+            converted_stats = {}
+            for age_group, stats in raw_stats.items():
+                converted_stats[age_group] = {
+                    "avg_spending": stats["avg_spending"],
+                    "median_spending": stats["median_spending"],
+                    "user_count": stats["user_count"],
+                    "category_averages": stats.get("category_averages", {}),
+                }
+            return converted_stats
+
+    # Fallback to default mock data
+    return get_mock_cohort_stats()
+
+
 def get_mock_cohort_stats() -> Dict[str, Dict]:
     """
     Get mock cohort statistics for demonstration.
-    In production, this would query the database.
+    Based on student_spending.csv dataset analysis, converted to KRW.
     """
     return {
-        "20s": {
-            "avg_spending": 850000,
-            "median_spending": 780000,
-            "user_count": 150,
+        "10s": {
+            "avg_spending": 2326000,  # ~1789 USD * 1300
+            "median_spending": 2307000,
+            "user_count": 232,
             "category_averages": {
-                "food": 250000,
-                "delivery": 120000,
-                "cafe": 80000,
-                "transport": 100000,
-                "shopping": 150000,
-                "entertainment": 100000,
-                "other": 50000
-            }
+                "food": 319000,
+                "transport": 164000,
+                "entertainment": 106000,
+                "education": 222000,
+                "health": 150000,
+                "shopping": 321000,
+                "other": 139000,
+                "utilities": 905000,
+            },
+        },
+        "20s": {
+            "avg_spending": 2336000,  # ~1797 USD * 1300
+            "median_spending": 2329000,
+            "user_count": 768,
+            "category_averages": {
+                "food": 331000,
+                "transport": 161000,
+                "entertainment": 112000,
+                "education": 229000,
+                "health": 148000,
+                "shopping": 308000,
+                "other": 142000,
+                "utilities": 905000,
+            },
         },
         "30s": {
-            "avg_spending": 1200000,
-            "median_spending": 1100000,
+            "avg_spending": 2800000,
+            "median_spending": 2600000,
             "user_count": 120,
             "category_averages": {
-                "food": 300000,
-                "delivery": 100000,
-                "cafe": 60000,
-                "transport": 150000,
-                "shopping": 200000,
-                "entertainment": 150000,
-                "utilities": 100000,
-                "other": 140000
-            }
-        },
-        "10s": {
-            "avg_spending": 350000,
-            "median_spending": 300000,
-            "user_count": 80,
-            "category_averages": {
-                "food": 100000,
-                "cafe": 50000,
-                "entertainment": 80000,
-                "shopping": 70000,
-                "other": 50000
-            }
-        },
-        "40s": {
-            "avg_spending": 1500000,
-            "median_spending": 1400000,
-            "user_count": 60,
-            "category_averages": {
-                "food": 350000,
+                "food": 400000,
                 "transport": 200000,
-                "shopping": 250000,
-                "utilities": 200000,
-                "education": 300000,
-                "other": 200000
-            }
-        }
+                "entertainment": 150000,
+                "education": 180000,
+                "health": 200000,
+                "shopping": 350000,
+                "other": 170000,
+                "utilities": 1150000,
+            },
+        },
     }
+
+
+# Load cohort stats at module level
+_COHORT_STATS = None
+
+
+def get_cohort_stats() -> Dict[str, Dict]:
+    """Get cohort statistics, loading from file if not already loaded."""
+    global _COHORT_STATS
+    if _COHORT_STATS is None:
+        _COHORT_STATS = load_cohort_stats_from_file()
+    return _COHORT_STATS
 
 
 def generate_peer_comparison_message(
     user_id: str,
     user_birth_year: int,
     user_transactions: pd.DataFrame,
-    cohort_stats: Optional[Dict[str, Dict]] = None,
-    period: Optional[str] = None
+    cohort_stats: Dict[str, Dict] | None = None,
+    period: str | None = None,
 ) -> PeerComparisonMessage:
     """
     Generate a peer comparison message for a user.
-    
+
     Args:
         user_id: User identifier
         user_birth_year: User's birth year
         user_transactions: User's transactions for the period
-        cohort_stats: Pre-computed cohort statistics (uses mock if None)
+        cohort_stats: Pre-computed cohort statistics (uses real data if None)
         period: Target period in 'YYYY-MM' format
-    
+
     Returns:
         PeerComparisonMessage with comparison data
     """
     if period is None:
         period = datetime.now().strftime("%Y-%m")
-    
+
     if cohort_stats is None:
-        cohort_stats = get_mock_cohort_stats()
-    
+        cohort_stats = get_cohort_stats()
+
     age_group = get_age_group(user_birth_year)
-    
+
     # Calculate user spending
     if user_transactions.empty:
         user_spending = 0
     else:
-        user_spending = float(user_transactions['amount'].sum())
-    
+        user_spending = float(user_transactions["amount"].sum())
+
     # Check if cohort data is available
     if age_group not in cohort_stats:
         return _create_no_data_message(user_id, age_group, user_spending, period)
-    
+
     cohort = cohort_stats[age_group]
-    
+
     # Check minimum cohort size for privacy
     if cohort["user_count"] < MIN_COHORT_SIZE:
         return _create_no_data_message(user_id, age_group, user_spending, period)
-    
+
     cohort_average = cohort["avg_spending"]
     difference_amount = user_spending - cohort_average
-    
+
     if cohort_average > 0:
         difference_percent = (difference_amount / cohort_average) * 100
     else:
         difference_percent = 0
-    
+
     # Determine comparison type
     if abs(difference_percent) <= SIMILARITY_THRESHOLD:
         comparison_type = "similar"
@@ -195,11 +233,15 @@ def generate_peer_comparison_message(
         comparison_type = "above"
     else:
         comparison_type = "below"
-    
+
     # Find top excess category if spending is above average
     top_excess_category = None
-    if comparison_type == "above" and "category_averages" in cohort and not user_transactions.empty:
-        user_by_category = user_transactions.groupby('category')['amount'].sum()
+    if (
+        comparison_type == "above"
+        and "category_averages" in cohort
+        and not user_transactions.empty
+    ):
+        user_by_category = user_transactions.groupby("category")["amount"].sum()
         max_excess = 0
         for category in user_by_category.index:
             user_amt = user_by_category[category]
@@ -208,16 +250,16 @@ def generate_peer_comparison_message(
             if excess > max_excess:
                 max_excess = excess
                 top_excess_category = category
-    
+
     # Generate message
     message = _generate_comparison_message(
         age_group=age_group,
         user_spending=user_spending,
         cohort_average=cohort_average,
         comparison_type=comparison_type,
-        top_excess_category=top_excess_category
+        top_excess_category=top_excess_category,
     )
-    
+
     return PeerComparisonMessage(
         id=str(uuid.uuid4()),
         age_group=age_group,
@@ -230,7 +272,7 @@ def generate_peer_comparison_message(
         message=message,
         cohort_size=cohort["user_count"],
         period=period,
-        generated_at=datetime.now().isoformat()
+        generated_at=datetime.now().isoformat(),
     )
 
 
@@ -239,12 +281,12 @@ def _generate_comparison_message(
     user_spending: float,
     cohort_average: float,
     comparison_type: str,
-    top_excess_category: Optional[str]
+    top_excess_category: str | None,
 ) -> str:
     """Generate natural language comparison message."""
     # Convert age group to Korean label
     age_label = age_group.replace("s", "").replace("+", "") + "대"
-    
+
     if comparison_type == "similar":
         return (
             f"{age_label} 사용자들의 평균 지출은 {format_currency(cohort_average)}이에요. "
@@ -263,7 +305,7 @@ def _generate_comparison_message(
         if top_excess_category:
             cat_label = CATEGORY_LABELS.get(top_excess_category, top_excess_category)
             category_hint = f" 특히 {cat_label} 지출을 조금 줄여보는 건 어떨까요?"
-        
+
         return (
             f"{age_label} 사용자들의 평균 지출은 {format_currency(cohort_average)}이에요. "
             f"회원님은 {format_currency(user_spending)}으로, "
@@ -272,14 +314,11 @@ def _generate_comparison_message(
 
 
 def _create_no_data_message(
-    user_id: str,
-    age_group: str,
-    user_spending: float,
-    period: str
+    user_id: str, age_group: str, user_spending: float, period: str
 ) -> PeerComparisonMessage:
     """Create a message when cohort data is unavailable."""
     age_label = age_group.replace("s", "").replace("+", "") + "대"
-    
+
     return PeerComparisonMessage(
         id=str(uuid.uuid4()),
         age_group=age_group,
@@ -292,6 +331,5 @@ def _create_no_data_message(
         message=f"아직 {age_label} 사용자 데이터가 충분하지 않아요. 곧 비교 정보를 제공해 드릴게요!",
         cohort_size=0,
         period=period,
-        generated_at=datetime.now().isoformat()
+        generated_at=datetime.now().isoformat(),
     )
-

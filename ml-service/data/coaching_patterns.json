@@ -1,0 +1,166 @@
+[
+  {
+    "pattern_name": "high_entertainment",
+    "description": "Entertainment spending in top 25%",
+    "affected_users_pct": 24.5,
+    "avg_entertainment_spending": 174131,
+    "threshold_amount": 130000,
+    "coaching_message": {
+      "title": "문화/여가 지출이 또래보다 높아요",
+      "body": "또래 평균보다 문화/여가 지출이 많습니다. 무료 대안을 찾아보는 건 어떨까요?",
+      "suggested_challenge": {
+        "type": "limit_amount",
+        "target": 100000,
+        "period": "month",
+        "category": "entertainment"
+      }
+    }
+  },
+  {
+    "pattern_name": "high_food",
+    "description": "Food spending in top 25%",
+    "affected_users_pct": 24.8,
+    "avg_food_spending": 473813,
+    "threshold_amount": 380000,
+    "coaching_message": {
+      "title": "식비 지출이 또래보다 높아요",
+      "body": "또래 평균보다 식비 지출이 많습니다. 집밥이나 도시락을 활용해보세요!",
+      "suggested_challenge": {
+        "type": "limit_amount",
+        "target": 300000,
+        "period": "month",
+        "category": "food"
+      }
+    }
+  },
+  {
+    "pattern_name": "high_delivery",
+    "description": "Frequent delivery orders (more than 8 times per month)",
+    "affected_users_pct": 30.0,
+    "avg_delivery_spending": 180000,
+    "threshold_count": 8,
+    "coaching_message": {
+      "title": "배달 주문이 잦아요",
+      "body": "이번 달 배달 주문이 평균보다 많습니다. 직접 요리하거나 포장을 활용해보세요!",
+      "suggested_challenge": {
+        "type": "limit_count",
+        "target": 4,
+        "period": "month",
+        "category": "delivery"
+      }
+    }
+  },
+  {
+    "pattern_name": "low_saver",
+    "description": "Spending more than 75% of income",
+    "affected_users_pct": 25.0,
+    "avg_spending_ratio": 1.82,
+    "coaching_message": {
+      "title": "수입 대비 지출 비율이 높아요",
+      "body": "수입의 대부분을 지출하고 있어요. 저축 목표를 세워보는 건 어떨까요?",
+      "suggested_challenge": {
+        "type": "limit_amount",
+        "target": 1500000,
+        "period": "month",
+        "category": "total"
+      }
+    }
+  },
+  {
+    "pattern_name": "high_shopping",
+    "description": "Shopping spending in top 25%",
+    "affected_users_pct": 24.8,
+    "avg_shopping_spending": 352714,
+    "threshold_amount": 300000,
+    "coaching_message": {
+      "title": "쇼핑 지출이 높아요",
+      "body": "쇼핑 지출이 많습니다. 정말 필요한 구매인지 다시 생각해보세요!",
+      "suggested_challenge": {
+        "type": "skip_days",
+        "target": 7,
+        "period": "month",
+        "category": "shopping"
+      }
+    }
+  },
+  {
+    "pattern_name": "evening_spender",
+    "description": "More than 60% of spending happens in evening/late night",
+    "affected_users_pct": 35.0,
+    "coaching_message": {
+      "title": "저녁/심야 시간대 지출이 많아요",
+      "body": "저녁과 심야 시간대에 지출이 집중되어 있어요. 충동 구매를 줄여보세요!",
+      "suggested_challenge": {
+        "type": "limit_count",
+        "target": 3,
+        "period": "week",
+        "category": "delivery"
+      }
+    }
+  },
+  {
+    "pattern_name": "cafe_frequent",
+    "description": "Cafe visits more than 10 times per month",
+    "affected_users_pct": 28.0,
+    "avg_cafe_spending": 120000,
+    "threshold_count": 10,
+    "coaching_message": {
+      "title": "카페 방문이 잦아요",
+      "body": "카페 방문 횟수가 많습니다. 텀블러를 활용하거나 집에서 커피를 내려보세요!",
+      "suggested_challenge": {
+        "type": "limit_count",
+        "target": 5,
+        "period": "month",
+        "category": "cafe"
+      }
+    }
+  },
+  {
+    "pattern_name": "transport_high",
+    "description": "Transportation spending above average",
+    "affected_users_pct": 22.0,
+    "avg_transport_spending": 220000,
+    "threshold_amount": 180000,
+    "coaching_message": {
+      "title": "교통비 지출이 높아요",
+      "body": "교통비 지출이 평균보다 높습니다. 대중교통이나 자전거를 활용해보세요!",
+      "suggested_challenge": {
+        "type": "limit_amount",
+        "target": 150000,
+        "period": "month",
+        "category": "transport"
+      }
+    }
+  },
+  {
+    "pattern_name": "weekend_spender",
+    "description": "Weekend spending significantly higher than weekday",
+    "affected_users_pct": 40.0,
+    "coaching_message": {
+      "title": "주말 지출이 많아요",
+      "body": "주말에 지출이 집중되어 있어요. 무료 활동이나 집에서 즐길 수 있는 취미를 찾아보세요!",
+      "suggested_challenge": {
+        "type": "limit_amount",
+        "target": 100000,
+        "period": "week",
+        "category": "entertainment"
+      }
+    }
+  },
+  {
+    "pattern_name": "subscription_heavy",
+    "description": "Multiple subscription services",
+    "affected_users_pct": 18.0,
+    "avg_subscription_spending": 50000,
+    "coaching_message": {
+      "title": "구독 서비스가 많아요",
+      "body": "여러 구독 서비스를 이용 중이에요. 실제로 사용하는 서비스인지 점검해보세요!",
+      "suggested_challenge": {
+        "type": "limit_count",
+        "target": 3,
+        "period": "month",
+        "category": "entertainment"
+      }
+    }
+  }
+]

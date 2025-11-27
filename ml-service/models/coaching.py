@@ -2,6 +2,7 @@
 AI Coaching Message Generator
 
 Generates personalized coaching messages based on user spending patterns.
+Uses patterns learned from student_spending.csv dataset.
 """
 
 from dataclasses import dataclass, asdict
@@ -10,12 +11,15 @@ from datetime import datetime
 import pandas as pd
 import uuid
 from enum import Enum
+import json
+import os
 
 
 class PatternType(str, Enum):
     SPENDING_INCREASE = "spending_increase"
     TIME_PATTERN = "time_pattern"
     POSITIVE_REINFORCEMENT = "positive_reinforcement"
+    PEER_COMPARISON = "peer_comparison"
 
 
 class ChallengePeriod(str, Enum):
@@ -72,6 +76,32 @@ TIME_SLOT_LABELS = {
 # Thresholds
 SIGNIFICANT_INCREASE_THRESHOLD = 15  # 15% increase triggers a warning
 MIN_AMOUNT_THRESHOLD = 10000  # Minimum amount to consider
+
+# USD to KRW conversion (for cohort data comparison)
+USD_TO_KRW = 1300
+
+
+def load_coaching_patterns() -> List[Dict]:
+    """Load coaching patterns from the generated JSON file."""
+    patterns_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "coaching_patterns.json"
+    )
+    if os.path.exists(patterns_path):
+        with open(patterns_path, "r") as f:
+            return json.load(f)
+    return []
+
+
+def load_cohort_averages() -> Dict[str, Dict]:
+    """Load cohort averages from the generated JSON file."""
+    json_path = os.path.join(
+        os.path.dirname(__file__), "..", "data", "cohort_stats.json"
+    )
+    if os.path.exists(json_path):
+        with open(json_path, "r") as f:
+            data = json.load(f)
+            return data.get("cohort_stats", {})
+    return {}
 
 
 def get_time_slot(hour: int) -> str:
@@ -272,7 +302,12 @@ def _generate_challenge(category: str, pattern_data: Dict) -> Optional[Suggested
     """Generate a specific challenge based on category and pattern."""
     category_label = CATEGORY_LABELS.get(category, category)
     
-    # Category-specific challenge templates
+    # Load patterns from dataset analysis
+    patterns = load_coaching_patterns()
+    
+    # Category-specific challenge templates (based on dataset analysis)
+    # Entertainment average is ~86 USD (~112,000 KRW), top 25% is ~134 USD
+    # Food average is ~252 USD (~328,000 KRW), top 25% is ~364 USD
     challenges = {
         "delivery": SuggestedChallenge(
             type="limit_count",
@@ -290,24 +325,31 @@ def _generate_challenge(category: str, pattern_data: Dict) -> Optional[Suggested
         ),
         "food": SuggestedChallenge(
             type="limit_amount",
-            target=50000,
-            period=ChallengePeriod.WEEK.value,
+            target=300000,  # Based on dataset median (~231 USD * 1300)
+            period=ChallengePeriod.MONTH.value,
             category=category,
-            description="이번 주 챌린지: 외식비를 5만원 이하로 제한해 보세요!"
+            description="이번 달 챌린지: 식비를 30만원 이하로 유지해보세요!"
         ),
         "shopping": SuggestedChallenge(
             type="limit_amount",
-            target=50000,
-            period=ChallengePeriod.WEEK.value,
+            target=200000,  # Based on dataset analysis
+            period=ChallengePeriod.MONTH.value,
             category=category,
-            description="이번 주 챌린지: 쇼핑 지출을 5만원 이하로 제한해 보세요!"
+            description="이번 달 챌린지: 쇼핑 지출을 20만원 이하로 제한해 보세요!"
         ),
         "entertainment": SuggestedChallenge(
-            type="limit_count",
-            target=1,
-            period=ChallengePeriod.WEEK.value,
+            type="limit_amount",
+            target=100000,  # Based on dataset median (~86 USD * 1300 ≈ 112,000)
+            period=ChallengePeriod.MONTH.value,
             category=category,
-            description="이번 주 챌린지: 유료 콘텐츠/구독을 1회로 제한해 보세요!"
+            description="이번 달 챌린지: 문화/여가 지출을 10만원 이하로 줄여보세요!"
+        ),
+        "education": SuggestedChallenge(
+            type="limit_amount",
+            target=200000,
+            period=ChallengePeriod.MONTH.value,
+            category=category,
+            description="이번 달 챌린지: 교육비를 20만원 이하로 관리해보세요!"
         ),
     }
     
@@ -323,4 +365,43 @@ def _generate_challenge(category: str, pattern_data: Dict) -> Optional[Suggested
         category=category,
         description=f"이번 주 챌린지: {category_label} 지출을 20% 줄여보세요!"
     )
+
+
+def compare_with_cohort(
+    user_spending: Dict[str, float],
+    age_group: str = "20s"
+) -> List[Dict]:
+    """
+    Compare user spending with cohort averages.
+    
+    Args:
+        user_spending: Dictionary of category -> amount
+        age_group: User's age group
+    
+    Returns:
+        List of categories where user exceeds cohort average significantly
+    """
+    cohort_stats = load_cohort_averages()
+    
+    if age_group not in cohort_stats:
+        return []
+    
+    cohort_averages = cohort_stats[age_group].get("category_averages", {})
+    
+    excess_categories = []
+    for category, user_amount in user_spending.items():
+        # Convert cohort USD to KRW for comparison
+        cohort_avg = cohort_averages.get(category, 0) * USD_TO_KRW
+        
+        if cohort_avg > 0:
+            excess_pct = ((user_amount - cohort_avg) / cohort_avg) * 100
+            if excess_pct > 20:  # More than 20% above average
+                excess_categories.append({
+                    "category": category,
+                    "user_amount": user_amount,
+                    "cohort_avg": cohort_avg,
+                    "excess_percent": excess_pct
+                })
+    
+    return sorted(excess_categories, key=lambda x: -x["excess_percent"])
 
