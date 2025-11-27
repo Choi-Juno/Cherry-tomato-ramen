@@ -37,15 +37,23 @@ export function AICoachingSection() {
 
   if (error) {
     return (
-      <Card className="bg-red-50 dark:bg-red-950/30">
-        <CardContent className="pt-6">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
-          <Button variant="outline" size="sm" onClick={refetch} className="mt-3">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            다시 시도
-          </Button>
-        </CardContent>
-      </Card>
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-violet-600" />
+            AI 코칭
+          </h2>
+        </div>
+        <Card className="bg-amber-50 dark:bg-amber-950/30">
+          <CardContent className="pt-6">
+            <p className="text-sm text-amber-700 dark:text-amber-400">{error}</p>
+            <Button variant="outline" size="sm" onClick={refetch} className="mt-3">
+              <RefreshCw className="h-4 w-4 mr-2" />
+              다시 시도
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     );
   }
 

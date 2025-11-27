@@ -31,19 +31,67 @@ export function useCoaching(): UseCoachingResult {
         fetch("/api/coaching/peer-comparison", { method: "POST" }),
       ]);
 
+      let coachingSuccess = false;
+      let peerSuccess = false;
+
       // Handle coaching message
-      if (coachingRes.status === "fulfilled" && coachingRes.value.ok) {
-        const data = await coachingRes.value.json();
-        if (data.success && data.message) {
-          setCoachingMessage(data.message);
+      if (coachingRes.status === "fulfilled") {
+        if (coachingRes.value.ok) {
+          try {
+            const data = await coachingRes.value.json();
+            if (data.success && data.message) {
+              setCoachingMessage(data.message);
+              coachingSuccess = true;
+            }
+          } catch (parseError) {
+            console.error("Failed to parse coaching response:", parseError);
+          }
+        } else {
+          console.error("Coaching API error:", coachingRes.value.status);
         }
+      } else {
+        console.error("Coaching fetch failed:", coachingRes.reason);
       }
 
       // Handle peer comparison
-      if (peerRes.status === "fulfilled" && peerRes.value.ok) {
-        const data = await peerRes.value.json();
-        if (data.success && data.comparison) {
-          setPeerComparison(data.comparison);
+      if (peerRes.status === "fulfilled") {
+        if (peerRes.value.ok) {
+          try {
+            const data = await peerRes.value.json();
+            if (data.success && data.comparison) {
+              setPeerComparison(data.comparison);
+              peerSuccess = true;
+            }
+          } catch (parseError) {
+            console.error("Failed to parse peer comparison response:", parseError);
+          }
+        } else {
+          // Check if it's a birth year not set error
+          try {
+            const errorData = await peerRes.value.json();
+            if (errorData.message) {
+              console.log("Peer comparison info:", errorData.message);
+            }
+          } catch {
+            console.error("Peer comparison API error:", peerRes.value.status);
+          }
+        }
+      } else {
+        console.error("Peer comparison fetch failed:", peerRes.reason);
+      }
+
+      // Only set error if both failed
+      if (!coachingSuccess && !peerSuccess) {
+        // Check if ML service is running
+        try {
+          const healthRes = await fetch(
+            process.env.NEXT_PUBLIC_ML_API_URL || "http://localhost:8000" + "/health"
+          );
+          if (!healthRes.ok) {
+            setError("ML 서비스가 실행되지 않았습니다. 터미널에서 ML 서비스를 시작해주세요.");
+          }
+        } catch {
+          setError("ML 서비스에 연결할 수 없습니다. 터미널에서 ML 서비스를 시작해주세요.");
         }
       }
     } catch (err) {
