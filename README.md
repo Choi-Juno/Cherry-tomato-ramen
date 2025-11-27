@@ -2,32 +2,31 @@
 
 > 대학생을 위한 AI 기반 스마트 가계부 & 소비 습관 개선 플랫폼
 
-[![Next.js](https://img.shields.io/badge/Next.js-16-black)](https://nextjs.org/)
+[![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-0.109-green)](https://fastapi.tiangolo.com/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-brightgreen)](https://supabase.com/)
+[![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v3-38B2AC)](https://tailwindcss.com/)
 
 **AI가 분석하고 코칭하는, 당신만의 소비 습관 트레이너** 🎯
 
 ---
 
-## 📋 Table of Contents
+## 📋 목차 (Table of Contents)
 
-- [About](#-about)
-- [Features](#-features)
-- [Tech Stack](#-tech-stack)
-- [Architecture](#-architecture)
-- [Getting Started](#-getting-started)
-- [Deployment](#-deployment)
-- [Documentation](#-documentation)
-- [Contributing](#-contributing)
-- [License](#-license)
+- [소개 (About)](#-소개-about)
+- [주요 기능 (Features)](#-주요-기능-features)
+- [기술 스택 (Tech Stack)](#-기술-스택-tech-stack)
+- [아키텍처 (Architecture)](#-아키텍처-architecture)
+- [시작하기 (Getting Started)](#-시작하기-getting-started)
+- [문서 (Documentation)](#-문서-documentation)
+- [프로젝트 구조 (Project Structure)](#-프로젝트-구조-project-structure)
 
 ---
 
-## 📖 About
+## 📖 소개 (About)
 
-**AI 소비 코치**는 대학생과 사회초년생의 건강한 금융 습관 형성을 돕는 AI 기반 소비 코칭 플랫폼입니다.
+**AI 소비 코치**는 대학생과 사회초년생의 건강한 금융 습관 형성을 돕는 AI 기반 소비 코칭 플랫폼입니다. 단순히 지출을 기록하는 것을 넘어, AI가 소비 패턴을 분석하고 구체적인 행동 변화를 제안합니다.
 
 ### 🎯 핵심 목표
 
@@ -35,112 +34,69 @@
 - 📈 6개월 내 입력 지속률 **50% 이상**
 - 🔄 1개월 리텐션 **20% 이상**
 
-### 🚀 What Makes Us Different?
+### 🚀 차별점 (What Makes Us Different?)
 
 | 기존 가계부 앱 | AI 소비 코치 |
 |--------------|-------------|
-| 단순 기록 중심 | AI 행동 변화 코칭 |
-| 수동적 입력 | 능동적 인사이트 제공 |
-| 3개월 내 이탈 70% | 습관 형성 중심 리텐션 |
+| 단순 기록 중심 | **AI 행동 변화 코칭** |
+| 수동적 입력 | **능동적 인사이트 제공** |
+| "얼마 썼는지" 확인 | **"어떻게 줄일지" 제안** |
 
 ---
 
-## ✨ Features
+## ✨ 주요 기능 (Features)
 
-### 🎨 **Core Features (MVP)**
+### 🎨 **핵심 기능 (Core Features)**
 
-#### 1. 간편 지출 입력
-- FAB 버튼으로 **2탭 이내** 입력
-- 최소한의 필드 (금액, 내용, 카테고리)
-- 자동 날짜 입력
+#### 1. 🤖 맞춤형 AI 코칭 (New!)
+- **행동 변화 제안**: "지난달보다 배달비가 18% 늘었어요. 이번 주 배달을 2회로 줄여보세요."와 같이 구체적인 행동 가이드를 제공합니다.
+- **또래 비교 (Peer Comparison)**: "20대 평균보다 식비를 15% 더 쓰고 있어요." 등 연령대별 평균 지출과 비교하여 내 위치를 알려줍니다.
+- **챌린지 추천**: 개인화된 절약 챌린지를 제안하고 달성을 독려합니다.
 
-#### 2. 스마트 대시보드
-- 📊 주간/월간 소비 추이 차트
-- 🎯 카테고리별 지출 분석
-- 💳 예산 대비 지출 현황
-- 🔔 최근 거래 내역
+#### 2. 📊 스마트 대시보드
+- **직관적인 차트**: 주간/월간 소비 추이, 카테고리별 지출 분석을 시각적으로 제공합니다.
+- **소비 트렌드**: 지출이 늘고 있는지 줄고 있는지 트렌드를 한눈에 파악할 수 있습니다.
 
-#### 3. AI 인사이트 (FastAPI + ML)
-- 🤖 **소비 페르소나 분석** (KMeans Clustering)
-  - 균형잡힌 소비자 🎯
-  - 식비 중심 🍽️
-  - 쇼핑 애호가 🛍️
-  - 절약형 소비자 💰
-  
-- 📈 **트렌드 감지**
-  - 월간 지출 증감 분석
-  - 카테고리별 변화 추이
-  - 급증 패턴 탐지
+#### 3. 💳 간편 지출 입력 & 관리
+- **초간편 입력**: FAB 버튼으로 언제 어디서나 빠르게 지출을 기록할 수 있습니다.
+- **소프트 삭제**: 실수로 지운 내역도 데이터베이스에는 안전하게 보관됩니다.
 
-- ⚠️ **예산 초과 위험 예측**
-  - 실시간 소비 속도 계산
-  - 월말 예상 지출 예측
-  - 카테고리별 경고
+#### 4. 🧠 AI 인사이트 (ML-Powered)
+- **소비 페르소나 분석**: 내 소비 패턴을 분석하여 '식비 중심', '쇼핑 애호가' 등 페르소나를 부여합니다.
+- **예산 초과 위험 예측**: 현재 속도로 돈을 쓰면 월말에 예산이 얼마나 초과될지 미리 경고해줍니다.
 
-- 💡 **절약 제안**
-  - 개인화된 행동 제안
-  - 구체적인 절약 금액 제시
-
-#### 4. 예산 관리
-- 카테고리별 예산 설정
-- 진행률 시각화
-- 초과 위험 알림
-
-#### 5. 거래 내역 관리
-- 검색 & 필터링
-- 카테고리별 분류
-- 수정 & 삭제
-
-#### 6. 설정
-- 알림 톤 선택 (코치형/친구형)
-- 데이터 내보내기 (CSV/Excel)
-- 프로필 관리
+#### 5. 💰 예산 관리
+- 카테고리별 예산을 설정하고 실시간 진행률을 확인할 수 있습니다.
 
 ---
 
-## 🛠 Tech Stack
+## 🛠 기술 스택 (Tech Stack)
 
 ### Frontend
-- **Framework**: Next.js 16 (App Router)
+- **Framework**: Next.js 15+ (App Router)
 - **Language**: TypeScript
-- **Styling**: TailwindCSS v4
-- **UI Components**: Radix UI + shadcn/ui
-- **Charts**: Recharts
-- **Forms**: React Hook Form + Zod
-- **State**: React Server Components (Server-first)
+- **Styling**: TailwindCSS, Shadcn/ui (Radix UI)
+- **State Management**: React Hooks (Custom Hooks), Context API
+- **Visualization**: Recharts
 
 ### Backend
 - **Database**: Supabase (PostgreSQL)
 - **Auth**: Supabase Auth
-- **API**: Next.js API Routes
-- **Real-time**: Supabase Realtime (optional)
+- **API**: Next.js API Routes (BFF pattern)
 
-### ML Service
-- **Framework**: FastAPI
-- **Language**: Python 3.11
-- **ML Libraries**: 
-  - pandas (data processing)
-  - scikit-learn (ML models)
-  - joblib (model persistence)
-- **Models**:
-  - KMeans (spending personas)
-  - Statistical analysis (trend detection)
-  - Rule-based (risk prediction)
-
-### Infrastructure
-- **Frontend Hosting**: Vercel
-- **ML Service**: Google Cloud Run
-- **Database**: Supabase Cloud
-- **CI/CD**: GitHub Actions + Cloud Build
+### AI/ML Service
+- **Framework**: FastAPI (Python 3.11+)
+- **Libraries**: pandas, scikit-learn, numpy
+- **Communication**: REST API (Frontend ↔ FastAPI)
 
 ---
 
-## 🏗 Architecture
+## 🏗 아키텍처 (Architecture)
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
 │                    CLIENT (Browser)                          │
-│                      Next.js 16                              │
+│                      Next.js App                             │
 └───────────────┬─────────────────────────────────────────────┘
                 │
     ┌───────────┴───────────┐
@@ -149,44 +105,34 @@
 ┌─────────┐          ┌──────────────┐
 │Supabase │          │ FastAPI ML   │
 │PostgreSQL│◄────────┤  Service     │
-│+ Auth   │          │ (Cloud Run)  │
+│+ Auth   │          │ (Python)     │
 └─────────┘          └──────────────┘
                            │
                            ▼
                     ┌──────────────┐
                     │  ML Models   │
-                    │  (joblib)    │
+                    │ (Clustering) │
                     └──────────────┘
 ```
 
-### Data Flow
-
-1. **User Input** → Next.js → Supabase (transactions)
-2. **AI Analysis** → Next.js API → FastAPI → ML Models
-3. **Insights** → FastAPI → Next.js API → Supabase (ai_insights)
-4. **Dashboard** → Next.js Server Components → Supabase (fetch data)
-
-For detailed architecture, see [`ARCHITECTURE.md`](./ARCHITECTURE.md)
-
 ---
 
-## 🚀 Getting Started
+## 🚀 시작하기 (Getting Started)
 
-### Prerequisites
+### 필수 요구사항 (Prerequisites)
 
-- Node.js 18+ & npm
+- Node.js 18+
 - Python 3.11+
-- Supabase account
-- (Optional) Docker for ML service
+- Supabase 계정
 
-### 1. Clone Repository
+### 1. 저장소 클론 (Clone Repository)
 
 ```bash
 git clone https://github.com/yourusername/cherry_tomato_ramen.git
 cd cherry_tomato_ramen
 ```
 
-### 2. Install Dependencies
+### 2. 의존성 설치 (Install Dependencies)
 
 ```bash
 # Frontend
@@ -194,22 +140,15 @@ npm install
 
 # ML Service
 cd ml-service
+python -m venv venv
+source venv/bin/activate  # Windows: venv\Scripts\activate
 pip install -r requirements.txt
 cd ..
 ```
 
-### 3. Set Up Supabase
+### 3. 환경 변수 설정 (Environment Variables)
 
-1. Create a project at [supabase.com](https://supabase.com)
-2. Run the migration:
-   - Copy `supabase/migrations/001_initial_schema.sql`
-   - Paste in Supabase SQL Editor
-   - Execute
-3. (Optional) Run `supabase/seed.sql` for test data
-
-### 4. Configure Environment Variables
-
-Create `.env.local`:
+프로젝트 루트에 `.env.local` 파일을 생성하고 다음 내용을 입력하세요:
 
 ```env
 # Supabase
@@ -219,168 +158,67 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 
 # ML Service
 NEXT_PUBLIC_ML_API_URL=http://localhost:8000
-ML_API_SECRET_KEY=dev-secret-key
+ML_SERVICE_URL=http://localhost:8000
 ```
 
-### 5. Run Development Servers
+### 4. 개발 서버 실행 (Run Development Servers)
 
-**Terminal 1 - Next.js:**
+두 개의 터미널을 열어 각각 실행해야 합니다.
+
+**Terminal 1 - Frontend (Next.js):**
 ```bash
 npm run dev
 ```
 
-**Terminal 2 - ML Service:**
+**Terminal 2 - ML Service (FastAPI):**
 ```bash
 cd ml-service
-uvicorn main:app --reload
+source venv/bin/activate
+uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 6. Open Browser
+### 5. 브라우저 접속
 
-Visit [http://localhost:3000](http://localhost:3000)
+[http://localhost:3000](http://localhost:3000)으로 접속하여 앱을 확인하세요.
 
 ---
 
-## 📦 Deployment
-
-See [`DEPLOYMENT.md`](./DEPLOYMENT.md) for complete deployment guide.
-
-### Quick Deploy
-
-**Frontend (Vercel):**
-```bash
-vercel --prod
-```
-
-**ML Service (Cloud Run):**
-```bash
-cd ml-service
-gcloud builds submit --config cloudbuild.yaml
-```
-
----
-
-## 📚 Documentation
-
-- [**ARCHITECTURE.md**](./ARCHITECTURE.md) - System architecture & design
-- [**DEPLOYMENT.md**](./DEPLOYMENT.md) - Deployment guide
-- [**ml-service/README.md**](./ml-service/README.md) - ML service documentation
-
-### Key Directories
+## 📂 프로젝트 구조 (Project Structure)
 
 ```
 cherry_tomato_ramen/
-├── app/                      # Next.js pages (App Router)
-│   ├── (dashboard)/          # Protected dashboard routes
-│   ├── api/                  # API routes
-│   └── layout.tsx            # Root layout
-├── components/               # React components
-│   ├── dashboard/            # Dashboard components
-│   ├── transactions/         # Transaction components
-│   ├── insights/             # AI insight components
-│   ├── shared/               # Shared components
-│   └── ui/                   # shadcn/ui primitives
-├── lib/                      # Utilities & clients
-│   ├── supabase/             # Supabase client
-│   ├── ml/                   # ML API client
-│   ├── hooks/                # React hooks
-│   └── utils.ts              # Utilities
-├── types/                    # TypeScript types
-├── supabase/                 # Database migrations
-├── ml-service/               # FastAPI ML service
-│   ├── models/               # ML models
-│   ├── pipeline/             # Data pipeline
-│   ├── main.py               # FastAPI app
-│   └── Dockerfile            # Container config
-└── public/                   # Static assets
+├── app/                      # Next.js App Router 페이지 및 API
+│   ├── api/                  # Backend API Routes
+│   ├── dashboard/            # 대시보드 페이지
+│   └── ...
+├── components/               # React 컴포넌트
+│   ├── coaching/             # AI 코칭 관련 컴포넌트
+│   ├── dashboard/            # 대시보드 차트 및 위젯
+│   └── ui/                   # 공통 UI 컴포넌트 (Shadcn)
+├── lib/                      # 유틸리티 및 훅
+│   ├── hooks/                # Custom React Hooks (useCoaching 등)
+│   ├── supabase/             # Supabase 클라이언트 설정
+│   └── ...
+├── ml-service/               # Python FastAPI ML 서비스
+│   ├── models/               # ML 모델 로직 (coaching.py, peer_comparison.py 등)
+│   ├── scripts/              # 데이터 생성 및 학습 스크립트
+│   └── main.py               # FastAPI 진입점
+├── supabase/                 # DB 마이그레이션 및 시드 데이터
+└── types/                    # TypeScript 타입 정의
 ```
 
 ---
 
-## 🎯 Roadmap
+## 📚 문서 (Documentation)
 
-### ✅ Phase 1 (MVP) - Current
-- [x] Next.js UI with all core pages
-- [x] Supabase schema & migrations
-- [x] FastAPI ML service
-- [x] Basic AI insights
-- [x] Deployment configurations
-
-### 🚧 Phase 2 (Growth)
-- [ ] User authentication & onboarding
-- [ ] Real-time notifications
-- [ ] Savings challenges & gamification
-- [ ] Data export/import (CSV/Excel)
-- [ ] Mobile responsive optimization
-- [ ] Performance optimization
-
-### 🔮 Phase 3 (Scale)
-- [ ] Advanced ML models (LSTM for predictions)
-- [ ] Social features (friend challenges)
-- [ ] Financial institution integrations
-- [ ] Premium subscription tier
-- [ ] Multi-language support
-
----
-
-## 🤝 Contributing
-
-We welcome contributions! Please see our contributing guidelines.
-
-### Development Process
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-### Code Style
-
-- Follow the [Frontend Design Guidelines](./docs/frontend-guidelines.md)
-- Use TypeScript strict mode
-- Write meaningful commit messages
-- Add tests for new features
-
----
-
-## 👥 Team
-
-- **Product**: Vision & UX design
-- **Frontend**: Next.js & React development
-- **Backend**: Supabase & API development
-- **ML/AI**: Python & FastAPI development
-- **DevOps**: Deployment & infrastructure
-
----
-
-## 📄 License
-
-MIT License - see [LICENSE](./LICENSE) for details
-
----
-
-## 🙏 Acknowledgments
-
-- [Next.js](https://nextjs.org/) - React framework
-- [Supabase](https://supabase.com/) - Database & Auth
-- [FastAPI](https://fastapi.tiangolo.com/) - ML API framework
-- [shadcn/ui](https://ui.shadcn.com/) - UI components
-- [Recharts](https://recharts.org/) - Chart library
-
----
-
-## 📞 Contact
-
-- **Repository**: [github.com/yourusername/cherry_tomato_ramen](https://github.com/yourusername/cherry_tomato_ramen)
-- **Issues**: [GitHub Issues](https://github.com/yourusername/cherry_tomato_ramen/issues)
+- [**ARCHITECTURE.md**](./ARCHITECTURE.md) - 시스템 아키텍처 상세
+- [**DEPLOYMENT.md**](./DEPLOYMENT.md) - 배포 가이드
+- [**ML_INTEGRATION_GUIDE.md**](./ML_INTEGRATION_GUIDE.md) - ML 서비스 연동 가이드
 
 ---
 
 <div align="center">
 
 **Made with ❤️ for university students**
-
-⭐ Star this repo if you find it helpful!
 
 </div>
