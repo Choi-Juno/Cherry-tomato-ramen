@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
     const { data: transactions, error: txError } = await supabase
       .from("transactions")
-      .select("date, amount, category")
+      .select("date, amount, category, time_slot")
       .eq("user_id", user.id)
       .eq("is_deleted", false)
       .gte("date", threeMonthsAgo.toISOString().split("T")[0])
