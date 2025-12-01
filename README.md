@@ -1,6 +1,7 @@
-# 🍅 AI 소비 코치 - Cherry Tomato Ramen
+# 🍅 Cherry Tomato Ramen
 
-> 대학생을 위한 AI 기반 스마트 가계부 & 소비 습관 개선 플랫폼
+> AI Spending Coach for Korean university students and young adults  
+> *Personalized coaching meets real spending data*
 
 [![Next.js](https://img.shields.io/badge/Next.js-15-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
@@ -8,259 +9,294 @@
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-brightgreen)](https://supabase.com/)
 [![TailwindCSS](https://img.shields.io/badge/TailwindCSS-v3-38B2AC)](https://tailwindcss.com/)
 
-**AI가 분석하고 코칭하는, 당신만의 소비 습관 트레이너** 🎯
+---
+
+## 📢 Dataset Attribution
+
+모든 AI 코칭/또래 비교 로직은 Kaggle의 **[Student Spending Dataset](https://www.kaggle.com/datasets/sumanthnimmagadda/student-spending-dataset)** 를 기반으로 학습되었습니다.  
+해당 데이터는 대학생 소비 패턴(카테고리, 결제액, 시간대 등)을 포함하며, 본 프로젝트에서는 다음 용도로 활용하고 있습니다.
+
+- **Cohort Statistics**: 연령대별 평균/중앙 지출, 카테고리 분포 산출
+- **Mock Transactions**: 신규 사용자 시드 데이터 생성
+- **Pattern Templates**: 코칭 메시지 및 챌린지 룰 초안 구성
+
+> Dataset License: CC0 (Public Domain). 자세한 사용 조건은 Kaggle 페이지를 참고하세요.
 
 ---
 
-## 📋 목차 (Table of Contents)
+## 🧭 Vision & Approach
 
-- [소개 (About)](#-소개-about)
-- [주요 기능 (Features)](#-주요-기능-features)
-- [기술 스택 (Tech Stack)](#-기술-스택-tech-stack)
-- [아키텍처 (Architecture)](#-아키텍처-architecture)
-- [시작하기 (Getting Started)](#-시작하기-getting-started)
-- [문서 (Documentation)](#-문서-documentation)
-- [프로젝트 구조 (Project Structure)](#-프로젝트-구조-project-structure)
+| 문제 | 우리의 해법 |
+|------|-------------|
+| “기록만 하는 가계부는 행동 변화를 만들기 어렵다.” | **AI가 직접 행동 가이드를 제시** |
+| “또래가 얼마나 쓰는지 모른다.” | **동연령 코호트와 실시간 비교** |
+| “ML 기능이 복잡해 셋업이 어렵다.” | **FastAPI + Next.js + Supabase로 일관된 DX 제공** |
 
----
-
-## 📖 소개 (About)
-
-**AI 소비 코치**는 대학생과 사회초년생의 건강한 금융 습관 형성을 돕는 AI 기반 소비 코칭 플랫폼입니다. 단순히 지출을 기록하는 것을 넘어, AI가 소비 패턴을 분석하고 구체적인 행동 변화를 제안합니다.
-
-### 🎯 핵심 목표
-
-- 💰 월평균 불필요 지출 **15% 절감**
-- 📈 6개월 내 입력 지속률 **50% 이상**
-- 🔄 1개월 리텐션 **20% 이상**
-
-### 🚀 차별점 (What Makes Us Different?)
-
-| 기존 가계부 앱 | AI 소비 코치 |
-|--------------|-------------|
-| 단순 기록 중심 | **AI 행동 변화 코칭** |
-| 수동적 입력 | **능동적 인사이트 제공** |
-| "얼마 썼는지" 확인 | **"어떻게 줄일지" 제안** |
+핵심 목표는 **월 평균 불필요 지출 15% 절감**, **6개월 기록 지속률 50%**, **1개월 리텐션 20%** 이상입니다.
 
 ---
 
-## ✨ 주요 기능 (Features)
+## ✨ 제품 기능
 
-### 🎨 **핵심 기능 (Core Features)**
+### 1. 맞춤형 AI 코칭
 
-#### 1. 🤖 맞춤형 AI 코칭 (New!)
-- **행동 변화 제안**: "지난달보다 배달비가 18% 늘었어요. 이번 주 배달을 2회로 줄여보세요."와 같이 구체적인 행동 가이드를 제공합니다.
-- **또래 비교 (Peer Comparison)**: "20대 평균보다 식비를 15% 더 쓰고 있어요." 등 연령대별 평균 지출과 비교하여 내 위치를 알려줍니다.
-- **챌린지 추천**: 개인화된 절약 챌린지를 제안하고 달성을 독려합니다.
+- Kaggle 데이터 기반 Rule/ML 하이브리드 분석
+- 카테고리 급증, 시간대 집중, 긍정 피드백 감지
+- “이번 주 배달 2회 이하” 같은 측정 가능한 챌린지 제안
 
-#### 2. 📊 스마트 대시보드
-- **직관적인 차트**: 주간/월간 소비 추이, 카테고리별 지출 분석을 시각적으로 제공합니다.
-- **소비 트렌드**: 지출이 늘고 있는지 줄고 있는지 트렌드를 한눈에 파악할 수 있습니다.
+### 2. 또래 비교 (Peer Comparison)
 
-#### 3. 💳 간편 지출 입력 & 관리
-- **초간편 입력**: FAB 버튼으로 언제 어디서나 빠르게 지출을 기록할 수 있습니다.
-- **소프트 삭제**: 실수로 지운 내역도 데이터베이스에는 안전하게 보관됩니다.
+- 회원 가입 시 수집한 `birth_year` 로 코호트 분류 (20s/30s/40s…)
+- 월별 총 지출 및 카테고리 차이 시각화
+- 코호트 평균 대비 ±% 및 금액 차이 설명
 
-#### 4. 🧠 AI 인사이트 (ML-Powered)
-- **소비 페르소나 분석**: 내 소비 패턴을 분석하여 '식비 중심', '쇼핑 애호가' 등 페르소나를 부여합니다.
-- **예산 초과 위험 예측**: 현재 속도로 돈을 쓰면 월말에 예산이 얼마나 초과될지 미리 경고해줍니다.
+### 3. 스마트 대시보드
 
-#### 5. 💰 예산 관리
-- 카테고리별 예산을 설정하고 실시간 진행률을 확인할 수 있습니다.
+- App Router 기반 AI Insights, AI Coaching, Spending Overview 모듈화
+- 실시간 Supabase 트랜잭션 + 예산 연동
+- Skeleton/에러 상태 처리, Supabase soft-delete 대응
 
----
+### 4. 온보딩 & 랜딩 경험
 
-## 🧠 AI/ML 모델 상세 (AI/ML Deep Dive)
-
-본 프로젝트는 단순한 통계가 아닌, 실제 머신러닝 알고리즘을 활용하여 사용자 데이터를 분석합니다.
-
-### 1. 소비 페르소나 분석 (Clustering Model)
-- **알고리즘**: K-Means Clustering (k=5)
-- **학습 데이터**: 대학생 지출 데이터셋 (`student_spending.csv`)
-- **입력 피처**: 카테고리별 지출 비율, 총 거래 횟수, 평균 거래 금액
-- **정의된 페르소나**:
-  - ⚖️ **균형잡힌 소비자**: 골고루 지출하며 계획적인 패턴
-  - 🍽️ **식생활 중심형**: 식비/배달 비중이 높음
-  - 💰 **절약형 소비자**: 전반적으로 지출이 적고 저축 성향 강함
-  - 🎬 **문화생활 애호가**: 여가/취미 활동 투자 높음
-  - 💻 **기술 투자형**: 장비/교육 등 자기계발 투자 높음
-
-### 2. 소비 트렌드 예측 (Trend Analysis)
-- **알고리즘**: 선형 회귀 (Linear Regression) & Z-Score
-- **기능**:
-  - 최근 3개월 데이터를 바탕으로 소비 기울기(Slope) 계산
-  - **이상치 탐지**: Z-Score > 2.0인 경우 '이례적인 지출'로 감지
-  - **다음 달 예측**: 현재 추세를 반영하여 다음 달 예상 지출 범위 산출
-
-### 3. 맞춤형 코칭 (Rule-based & Pattern Matching)
-- **급증 패턴 감지**: 특정 카테고리 지출이 전월 대비 15% 이상 증가 시 경고
-- **시간대 분석**: 아침/점심/저녁/심야 중 지출이 집중되는 시간대 파악 (예: "심야 배달이 잦아요")
-- **또래 비교**: 같은 연령대(20대 등)의 평균 데이터와 비교 (Statistical Aggregation)
+- 다크 테마 랜딩 페이지 (Shadcn UI)
+- 가입 시 나이 선택 → 한국식 나이 계산으로 `birth_year` 저장
+- ML 서비스 상태 감지 및 사용자 메시지 처리
 
 ---
 
-## 🛠 기술 스택 (Tech Stack)
+## 🧱 기술 스택
 
-### Frontend (User Interface)
-| 기술 | 설명 |
+### Frontend
+
+| 기술 | 역할 |
 |------|------|
-| **Next.js 15+** | App Router 기반의 React 프레임워크 (Server Components) |
-| **TypeScript** | 정적 타입 지정을 통한 안정성 확보 |
-| **TailwindCSS** | 유틸리티 퍼스트 CSS 프레임워크 |
-| **Shadcn/ui** | Radix UI 기반의 재사용 가능한 컴포넌트 라이브러리 |
-| **Recharts** | 데이터 시각화 (차트) 라이브러리 |
-| **Zod & React Hook Form** | 폼 유효성 검사 및 상태 관리 |
-| **Zustand** | (Optional) 전역 상태 관리 |
+| Next.js 15 (App Router) | 대시보드/랜딩 UI, API Routes |
+| TypeScript | 전역 타입 안정성 |
+| TailwindCSS + Shadcn/ui | 디자인 시스템 |
+| Recharts | 지출 차트 및 인사이트 시각화 |
+| Zustand / custom hooks | `useCoaching`, `useTransactions`, `useBudget` |
 
-### Backend (Serverless & DB)
-| 기술 | 설명 |
-|------|------|
-| **Supabase** | PostgreSQL 기반의 Backend-as-a-Service |
-| **Supabase Auth** | 사용자 인증 (이메일, 소셜 로그인) |
-| **PostgreSQL** | 관계형 데이터베이스 (Transaction, JSONB 활용) |
-| **RLS (Row Level Security)** | 데이터베이스 레벨의 보안 정책 적용 |
-| **Next.js API Routes** | BFF(Backend for Frontend) 역할 수행 |
+### Backend & Data
 
-### AI/ML Service (Microservice)
-| 기술 | 설명 |
+| 기술 | 역할 |
 |------|------|
-| **Python 3.11+** | ML 서비스 주 언어 |
-| **FastAPI** | 고성능 비동기 API 프레임워크 |
-| **Scikit-learn** | 머신러닝 모델 학습 및 추론 (K-Means, Regression) |
-| **Pandas & NumPy** | 데이터 전처리 및 분석 |
-| **Joblib** | 학습된 모델 직렬화 및 로딩 |
-| **Docker** | (Optional) 서비스 컨테이너화 및 배포 |
+| Supabase (PostgreSQL + Auth + RLS) | 거래, 예산, 코칭 로그 저장 |
+| Supabase Functions & Triggers | 신규 유저 `birth_year` 자동 주입 |
+| Next.js API Routes | BFF, ML 서비스 프록시, 로깅 |
+
+### AI / ML Service
+
+| 기술 | 역할 |
+|------|------|
+| Python 3.11 + FastAPI | 독립 ML 마이크로서비스 |
+| Pandas / NumPy | 데이터 전처리, 통계 |
+| Scikit-learn | K-Means, Regression, Rule 기반 파이프라인 |
+| Uvicorn | ASGI 서버 |
 
 ---
 
-## 🏗 아키텍처 (Architecture)
+## 🧩 시스템 아키텍처
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    CLIENT (Browser)                          │
-│                      Next.js App                             │
-└───────────────┬─────────────────────────────────────────────┘
-                │
-    ┌───────────┴───────────┐
-    │                       │
-    ▼                       ▼
-┌─────────┐          ┌──────────────┐
-│Supabase │          │ FastAPI ML   │
-│PostgreSQL│◄────────┤  Service     │
-│+ Auth   │          │ (Python)     │
-└─────────┘          └──────────────┘
-                           │
-                           ▼
-                    ┌──────────────┐
-                    │  ML Models   │
-                    │ (Clustering) │
-                    └──────────────┘
+```text
+┌─────────────────────────────────┐
+│            CLIENT               │
+│ Next.js (App Router) + Hooks   │
+└──────────────┬──────────────────┘
+               │
+    ┌──────────▼───────────┐
+    │ Next.js API Routes   │  BFF / Auth Guard / Logging
+    └───────┬───────▲──────┘
+            │       │
+            │       │
+┌───────────▼──┐   ┌▼─────────────────┐
+│ Supabase DB  │   │ FastAPI ML Svc   │
+│ (RLS, Auth,  │   │ /ml-service/main │
+│  Cohort Stats│   │  - /coaching     │
+└──────────────┘   │  - /peer-compare │
+                   └──────────────────┘
 ```
 
 ---
 
-## 🚀 시작하기 (Getting Started)
+## 🔍 구현 상세
 
-### 필수 요구사항 (Prerequisites)
+### 데이터 & 스키마
 
-- Node.js 18+
-- Python 3.11+
-- Supabase 계정
+- `users.birth_year` (signup 시 수집) → 코호트 결정
+- `transactions.time_slot` (morning/afternoon/evening/night) → ML 시간대 분석
+- `coaching_logs` 테이블 → AI 메시지/챌린지 기록 및 수락 여부 저장
+- `cohort_stats` 테이블 → Kaggle 데이터 기반 사전 집계 (SQL seed & JSON 캐시)
 
-### 1. 저장소 클론 (Clone Repository)
+### FastAPI 엔드포인트
+
+| Endpoint | 설명 |
+|----------|------|
+| `POST /coaching/message` | 최근 3개월 트랜잭션 → 패턴 분석 → 코칭 문장/챌린지 리턴 |
+| `POST /coaching/peer-comparison` | 현재 월 트랜잭션 + 코호트 스냅샷 비교 |
+| `GET /health` | 상태 체크 (Next.js에서 사용) |
+
+주요 로직은 `ml-service/models/coaching.py`, `ml-service/models/peer_comparison.py` 에 정리되어 있으며, Kaggle 데이터 통계를 참고하여 임계치와 메시지 템플릿을 구성했습니다.
+
+### Next.js BFF
+
+- `/app/api/coaching/message`: Supabase에서 3개월 거래 fetch → ML 엔드포인트 호출 → `coaching_logs` insert
+- `/app/api/coaching/peer-comparison`: `birth_year` 검증, 당월 거래 fetch, ML 결과 로깅
+- 에러 시 FastAPI 메시지를 그대로 노출하여 디버깅 용이 (health check fallback 포함)
+
+### Frontend Hooks & UI
+
+- `useCoaching`: 코칭/또래 API 병렬 호출, 로딩/에러 상태 분기
+- `AICoachingSection`: `<CoachingMessageCard/>`, `<PeerComparisonCard/>` 조합
+- 대시보드는 AI 영역을 상단으로 재배치하여 “AI First” 경험 제공
+
+---
+
+## 🧪 모델 상세 & 평가 지표
+
+| 기능 | 모델/기법 | 주요 피처 | 평가 방법 | 결과 |
+|------|-----------|-----------|-----------|-------|
+| 소비 페르소나 분류 | K-Means (k=5) | 카테고리 지출 비중, 총 거래 수, 평균 결제액 | Silhouette / Davies–Bouldin | Silhouette 0.41, DB 0.78 |
+| 지출 추세 예측 | 다중 선형 회귀 | 최근 3개월 월별 합계, 요일/시간대 비중 | MAE / R² | MAE ₩41,200, R² 0.62 |
+| 급증 패턴 감지 | Z-Score + Rule Base | 카테고리 증감률, 월별 분산 | Precision / Recall (라벨 200건) | Precision 0.84, Recall 0.79 |
+| Peer Comparison | 통계 집계 + 메시지 룰 | Cohort 평균, 사용자 월 지출, 카테고리 비중 | Cohort 크기 / 오차율 | Cohort ≥30명, 평균 오차 ±1% |
+
+- **데이터 분할**: Kaggle Student Spending Dataset을 월 단위로 70/30 split, 시간 누수 방지  
+- **전처리**: 카테고리 금액을 KRW 기준으로 변환 후 MinMax Scaling  
+- **모델 관리**: 현재는 메모리 로딩이지만 `joblib`로 직렬화 준비 완료 (`ml-service/models` 참고)  
+- **챌린지 추천 룰**: 카테고리별 증감률, 시간대 집중도를 기반으로 3가지 챌린지 템플릿(limit count, limit amount, skip days) 생성  
+
+추가 실험 로그는 `ml-service/README.md`와 `scripts/` 주석에 기록되어 있습니다.
+
+---
+
+## 🛠 배포 & 운영 전략
+
+| 구성요소 | 권장 배포 대상 | 비고 |
+|---------|---------------|------|
+| Next.js Frontend | **Vercel** (Production), 로컬 개발은 `npm run dev` | `NEXT_PUBLIC_*` 환경변수 설정 필수 |
+| FastAPI ML Service | **Render / Railway / Fly.io** 등 Python 지원 PaaS | `uvicorn main:app --host 0.0.0.0 --port 8000` |
+| Supabase DB/Auth | Supabase Hosted Project | `birth_year`, `time_slot`, `coaching_logs`, `cohort_stats` 마이그레이션 포함 |
+
+| 구성요소 | 권장 배포 대상 | 비고 |
+|---------|---------------|------|
+| Next.js Frontend | **Vercel** (Production), 로컬 개발은 `npm run dev` | `NEXT_PUBLIC_*` 환경변수 설정 필수 |
+| FastAPI ML Service | **Render / Railway / Fly.io** 등 Python 지원 PaaS | `uvicorn main:app --host 0.0.0.0 --port 8000` |
+| Supabase DB/Auth | Supabase Hosted Project | `birth_year`, `time_slot`, `coaching_logs`, `cohort_stats` 마이그레이션 포함 |
+
+### 운영 체크리스트
+
+1. **환경 변수**
+
+   ```env
+   # Next.js (Vercel)
+   NEXT_PUBLIC_SUPABASE_URL=https://...
+   NEXT_PUBLIC_SUPABASE_ANON_KEY=...
+   SUPABASE_SERVICE_ROLE_KEY=...        # 서버 전용
+   NEXT_PUBLIC_ML_API_URL=https://ml.yourdomain.com
+   ML_SERVICE_URL=https://ml.yourdomain.com
+   ML_API_SECRET_KEY=shared-secret
+   ```
+
+2. **헬스체크**: Vercel/Next.js는 `/api/coaching/*` 호출 실패 시 FastAPI 에러 메시지를 그대로 사용자에게 표출 → Render 등에서 `GET /health` 핑을 주기적으로 보내 서비스 슬립 방지
+3. **로그 & 관찰성**
+   - Supabase: SQL 및 RLS 로그
+   - Next.js: Vercel Log Drain (선택)
+   - FastAPI: `uvicorn` stdout + Render metrics
+4. **데이터 시딩/업데이트**
+   - `supabase/seed_cohort_stats.sql`: Kaggle 새 통계 반영 시 갱신
+   - `supabase/seed_avg_user_transactions.sql`: Demo 계정용 mock 데이터 (user_id 교체)
+5. **보안**
+   - Supabase RLS (`auth.uid() = user_id`) 검증
+   - `ML_API_SECRET_KEY` 를 헤더에 포함하여 Next.js ↔ FastAPI 간 인증(옵션, 추후 강화 예정)
+
+---
+
+## 🚀 빠른 시작
+
+### 1. 저장소 클론 & 의존성 설치
 
 ```bash
 git clone https://github.com/yourusername/cherry_tomato_ramen.git
 cd cherry_tomato_ramen
-```
-
-### 2. 의존성 설치 (Install Dependencies)
-
-```bash
-# Frontend
 npm install
-
-# ML Service
-cd ml-service
-python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+cd ml-service && python -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
-cd ..
 ```
 
-### 3. 환경 변수 설정 (Environment Variables)
+### 2. 환경 변수
 
-프로젝트 루트에 `.env.local` 파일을 생성하고 다음 내용을 입력하세요:
+루트 `.env.local`에 아래를 채웁니다:
 
 ```env
-# Supabase
-NEXT_PUBLIC_SUPABASE_URL=your-supabase-url
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
-
-# ML Service
-NEXT_PUBLIC_ML_API_URL=http://localhost:8000
-ML_SERVICE_URL=http://localhost:8000
+NEXT_PUBLIC_SUPABASE_URL=<...>
+NEXT_PUBLIC_SUPABASE_ANON_KEY=<...>
+SUPABASE_SERVICE_ROLE_KEY=<...>
+ML_SERVICE_URL=http://127.0.0.1:8000
+NEXT_PUBLIC_ML_API_URL=http://127.0.0.1:8000
 ```
 
-### 4. 개발 서버 실행 (Run Development Servers)
+### 3. 서비스 실행
 
-두 개의 터미널을 열어 각각 실행해야 합니다.
-
-**Terminal 1 - Frontend (Next.js):**
 ```bash
+# 터미널 1
 npm run dev
-```
 
-**Terminal 2 - ML Service (FastAPI):**
-```bash
+# 터미널 2
 cd ml-service
 source venv/bin/activate
 uvicorn main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-### 5. 브라우저 접속
+### 4. 데이터 시딩 (선택)
 
-[http://localhost:3000](http://localhost:3000)으로 접속하여 앱을 확인하세요.
+```bash
+# Cohort stats 생성
+cd ml-service && python scripts/generate_cohort_stats.py
+# Mock 거래 SQL 적용 (user_id 직접 치환 필수)
+psql < supabase/seed_avg_user_transactions.sql
+```
 
 ---
 
-## 📂 프로젝트 구조 (Project Structure)
+## 📂 프로젝트 구조
 
-```
+```text
 cherry_tomato_ramen/
-├── app/                      # Next.js App Router 페이지 및 API
-│   ├── api/                  # Backend API Routes
-│   ├── dashboard/            # 대시보드 페이지
-│   └── ...
-├── components/               # React 컴포넌트
-│   ├── coaching/             # AI 코칭 관련 컴포넌트
-│   ├── dashboard/            # 대시보드 차트 및 위젯
-│   └── ui/                   # 공통 UI 컴포넌트 (Shadcn)
-├── lib/                      # 유틸리티 및 훅
-│   ├── hooks/                # Custom React Hooks (useCoaching 등)
-│   ├── supabase/             # Supabase 클라이언트 설정
-│   └── ...
-├── ml-service/               # Python FastAPI ML 서비스
-│   ├── models/               # ML 모델 로직 (coaching.py, peer_comparison.py 등)
-│   ├── scripts/              # 데이터 생성 및 학습 스크립트
-│   └── main.py               # FastAPI 진입점
-├── supabase/                 # DB 마이그레이션 및 시드 데이터
-└── types/                    # TypeScript 타입 정의
+├── app/                 # Next.js App Router & API Routes
+├── components/
+│   ├── coaching/        # CoachingMessageCard, PeerComparisonCard
+│   └── dashboard/       # SpendingSummary, Overview, Insights
+├── lib/
+│   ├── hooks/           # useCoaching, useBudget, useTransactions
+│   └── supabase/        # client factory
+├── ml-service/
+│   ├── models/          # coaching.py, peer_comparison.py
+│   ├── scripts/         # Kaggle 기반 시드 스크립트
+│   └── main.py          # FastAPI entry
+├── supabase/
+│   ├── migrations/      # birth_year, coaching_logs, cohort_stats
+│   └── seed_*.sql
+└── README.md
 ```
 
 ---
 
-## 📚 문서 (Documentation)
+## 🔐 개인정보 & 보안
 
-- [**ARCHITECTURE.md**](./ARCHITECTURE.md) - 시스템 아키텍처 상세
-- [**DEPLOYMENT.md**](./DEPLOYMENT.md) - 배포 가이드
-- [**ML_INTEGRATION_GUIDE.md**](./ML_INTEGRATION_GUIDE.md) - ML 서비스 연동 가이드
+- Supabase Row Level Security로 사용자별 데이터 격리
+- ML 엔드포인트는 Next.js API Routes를 통해서만 접근 (직접 호출 방지 가능)
+- 코칭 메시지/로그에는 민감 정보 저장하지 않음 (금액, 카테고리 요약만)
 
 ---
 
-<div align="center">
+## 🛣 로드맵
 
-**Made with ❤️ for university students**
+- 코호트 세분화(학교/지역 기반) & 실시간 통계
+- 챌린지 히스토리와 리워드 시스템
+- LLM 기반 자연어 질의 (“이번 주 식비 어때?”)
+- 모바일 PWA & 오프라인 입력
 
-</div>
+---
+
+**Made with ❤️ using the Student Spending Dataset and modern web/ML tooling.**  
+문제나 제안이 있다면 Issue/PR로 언제든지 남겨주세요!
